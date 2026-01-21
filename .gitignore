@@ -20,6 +20,10 @@ vendor/
 .env
 .env.local
 .env.*.local
+config.php
+
+# Database
+data/*.db
 
 # Logs
 *.log
