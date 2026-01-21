@@ -1,0 +1,249 @@
+/**
+ * Theme switch styles - Day/Night toggle with SVG backgrounds
+ * DAY: Sun on RIGHT
+ * NIGHT: Moon on LEFT
+ */
+
+.theme-switch {
+    --switch-width: 88px;
+    --switch-height: 35px;
+    --toggle-size: 32px;
+    --toggle-offset: 2px;
+    --wipe-duration: 600ms;
+
+    position: relative;
+    width: var(--switch-width);
+    height: var(--switch-height);
+    flex-shrink: 0;
+}
+
+.theme-switch__input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-switch__track {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+/* ========================
+   SVG BACKGROUNDS
+   ======================== */
+
+.theme-switch__night-bg,
+.theme-switch__day-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: var(--radius-full);
+}
+
+.theme-switch__night-bg {
+    background-image: url('../img/svg/night_bg.svg');
+    z-index: 1;
+}
+
+.theme-switch__day-bg {
+    background-image: url('../img/svg/day_bg.svg');
+    z-index: 2;
+    clip-path: inset(0 100% 0 0); /* Default: hidden (clipped from RIGHT) */
+    transition: clip-path var(--wipe-duration) ease-in-out;
+}
+
+/* Day mode: day bg visible (wipes in from left) */
+.theme-switch__input:checked ~ .theme-switch__track .theme-switch__day-bg {
+    clip-path: inset(0 0 0 0);
+}
+
+/* ========================
+   TOGGLE (SUN/MOON)
+   ======================== */
+
+.theme-switch__toggle {
+    position: absolute;
+    top: var(--toggle-offset);
+    left: var(--toggle-offset);
+    width: var(--toggle-size);
+    height: var(--toggle-size);
+    border-radius: 50%;
+    transition: left var(--wipe-duration) cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+/* Moon (default - night state, LEFT position) */
+.theme-switch__moon {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        145deg,
+        #e8e8e8 0%,
+        #d4d4d4 30%,
+        #b8b8b8 70%,
+        #a0a0a0 100%
+    );
+    border-radius: 50%;
+    box-shadow:
+        inset -3px -3px 6px rgba(0, 0, 0, 0.15),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: opacity calc(var(--wipe-duration) * 0.5);
+}
+
+/* Moon craters - higher contrast */
+.theme-switch__crater {
+    position: absolute;
+    background: rgba(100, 110, 125, 0.65);
+    border-radius: 50%;
+    box-shadow: inset 1px 1px 2px rgba(60, 70, 80, 0.5);
+}
+
+.theme-switch__crater--1 {
+    width: 10px;
+    height: 10px;
+    top: 5px;
+    right: 8px;
+}
+
+.theme-switch__crater--2 {
+    width: 8px;
+    height: 8px;
+    bottom: 8px;
+    left: 6px;
+}
+
+.theme-switch__crater--3 {
+    width: 5px;
+    height: 5px;
+    bottom: 10px;
+    right: 6px;
+}
+
+/* Sun (day state, RIGHT position) */
+.theme-switch__sun {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        145deg,
+        #ffd93d 0%,
+        #ffcc02 30%,
+        #f5a623 70%,
+        #e8940c 100%
+    );
+    border-radius: 50%;
+    box-shadow:
+        0 0 12px rgba(255, 200, 50, 0.6),
+        0 0 24px rgba(255, 200, 50, 0.3),
+        inset -3px -3px 6px rgba(0, 0, 0, 0.1),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.8);
+    opacity: 0;
+    transition: opacity calc(var(--wipe-duration) * 0.5);
+}
+
+/* Sun inner glow */
+.theme-switch__sun::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 255, 200, 0.9) 0%,
+        transparent 60%
+    );
+    border-radius: 50%;
+}
+
+/* ========================
+   DAY MODE (checked state)
+   ======================== */
+
+/* Toggle moves to RIGHT */
+.theme-switch__input:checked ~ .theme-switch__track .theme-switch__toggle {
+    left: calc(100% - var(--toggle-size) - var(--toggle-offset));
+}
+
+.theme-switch__input:checked ~ .theme-switch__track .theme-switch__moon {
+    opacity: 0;
+}
+
+.theme-switch__input:checked ~ .theme-switch__track .theme-switch__sun {
+    opacity: 1;
+}
+
+/* ========================
+   TRANSITION DIRECTION CLASSES (set by JS)
+   clip-path: inset(top right bottom left)
+
+   Wipe LEFT→RIGHT = clip from RIGHT (right value 100%→0%)
+   Wipe RIGHT→LEFT = clip from LEFT (left value 0%→100%)
+   ======================== */
+
+/* Going to DAY: wipe LEFT to RIGHT (toggle moves left→right) */
+/* Day bg: clipped from RIGHT → fully visible */
+.theme-switch--to-day .theme-switch__day-bg {
+    clip-path: inset(0 100% 0 0); /* clipped from right = hidden */
+}
+.theme-switch--to-day .theme-switch__input:checked ~ .theme-switch__track .theme-switch__day-bg {
+    clip-path: inset(0 0 0 0); /* fully visible */
+}
+
+/* Going to NIGHT: night appears from RIGHT (toggle moves right→left) */
+/* Day bg: fully visible → clipped from RIGHT (reveals night from right) */
+.theme-switch--to-night .theme-switch__day-bg {
+    clip-path: inset(0 0 0 0); /* starts visible */
+}
+.theme-switch--to-night .theme-switch__input:not(:checked) ~ .theme-switch__track .theme-switch__day-bg {
+    clip-path: inset(0 100% 0 0); /* clipped from right = hidden, night appears from right */
+}
+
+/* ========================
+   ACCESSIBILITY & INTERACTIONS
+   ======================== */
+
+.theme-switch__input:focus-visible ~ .theme-switch__track {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+}
+
+.theme-switch:hover .theme-switch__toggle {
+    transform: scale(1.05);
+}
+
+/* ========================
+   MOBILE ADJUSTMENTS
+   ======================== */
+
+@media (max-width: 767px) {
+    .theme-switch {
+        --switch-width: 72px;
+        --switch-height: 29px;
+        --toggle-size: 26px;
+        --toggle-offset: 2px;
+    }
+
+    .theme-switch__crater--1 {
+        width: 8px;
+        height: 8px;
+        top: 4px;
+        right: 6px;
+    }
+    .theme-switch__crater--2 {
+        width: 6px;
+        height: 6px;
+        bottom: 6px;
+        left: 5px;
+    }
+    .theme-switch__crater--3 {
+        width: 4px;
+        height: 4px;
+        bottom: 8px;
+        right: 5px;
+    }
+}
