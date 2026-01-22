@@ -20,6 +20,46 @@ const ThemeSwitch = (function() {
     // Transition duration (must match CSS --wipe-duration)
     const WIPE_DURATION = 600;
 
+    // SVG path for reading dimensions
+    const SVG_BG_PATH = 'assets/img/svg/night_bg.svg';
+
+    /**
+     * Fetch SVG and extract viewBox dimensions to set CSS variables
+     * This allows the switch to automatically adapt to SVG dimension changes
+     */
+    async function initSwitchDimensions() {
+        try {
+            const response = await fetch(SVG_BG_PATH);
+            const svgText = await response.text();
+
+            // Extract viewBox: "0 0 WIDTH HEIGHT"
+            const viewBoxMatch = svgText.match(/viewBox=["']0\s+0\s+([\d.]+)\s+([\d.]+)["']/);
+
+            if (viewBoxMatch) {
+                const svgWidth = parseFloat(viewBoxMatch[1]);
+                const svgHeight = parseFloat(viewBoxMatch[2]);
+                const aspectRatio = svgWidth / svgHeight;
+
+                // Set CSS custom properties on :root
+                document.documentElement.style.setProperty('--switch-aspect-ratio', aspectRatio.toFixed(4));
+
+                if (window.MV_IS_ADMIN) {
+                    console.group('📐 Theme Switch - Dimensions');
+                    console.log('SVG viewBox:', `${svgWidth} × ${svgHeight}`);
+                    console.log('Aspect ratio:', aspectRatio.toFixed(4));
+                    console.groupEnd();
+                }
+            }
+        } catch (error) {
+            // Fallback: use default aspect ratio (280/130)
+            document.documentElement.style.setProperty('--switch-aspect-ratio', '2.1538');
+
+            if (window.MV_IS_ADMIN) {
+                console.warn('📐 Theme Switch: Could not load SVG, using fallback aspect ratio');
+            }
+        }
+    }
+
     /**
      * Calculate day of year (1-365)
      * @param {Date} date
@@ -235,6 +275,9 @@ const ThemeSwitch = (function() {
         // Apply initial theme immediately (before DOM ready to prevent flash)
         const initialTheme = getInitialTheme();
         applyTheme(initialTheme);
+
+        // Initialize switch dimensions from SVG
+        initSwitchDimensions();
 
         // Wait for DOM to set up event listener
         if (document.readyState === 'loading') {

@@ -5,10 +5,17 @@
  */
 
 .theme-switch {
-    --switch-width: 88px;
+    /* Base height - only value to change for sizing */
     --switch-height: 35px;
-    --toggle-size: 32px;
-    --toggle-offset: 2px;
+
+    /* Calculated from SVG viewBox via JS (fallback: 280/130) */
+    --switch-aspect-ratio: 2.1538;
+
+    /* Derived values */
+    --switch-width: calc(var(--switch-height) * var(--switch-aspect-ratio));
+    --toggle-size: calc(var(--switch-height) * 0.85);
+    --toggle-offset: calc((var(--switch-height) - var(--toggle-size)) / 2);
+
     --wipe-duration: 600ms;
 
     position: relative;
@@ -106,24 +113,24 @@
 }
 
 .theme-switch__crater--1 {
-    width: 10px;
-    height: 10px;
-    top: 5px;
-    right: 8px;
+    width: 31%;
+    height: 31%;
+    top: 15%;
+    right: 25%;
 }
 
 .theme-switch__crater--2 {
-    width: 8px;
-    height: 8px;
-    bottom: 8px;
-    left: 6px;
+    width: 25%;
+    height: 25%;
+    bottom: 25%;
+    left: 18%;
 }
 
 .theme-switch__crater--3 {
-    width: 5px;
-    height: 5px;
-    bottom: 10px;
-    right: 6px;
+    width: 16%;
+    height: 16%;
+    bottom: 31%;
+    right: 18%;
 }
 
 /* Sun (day state, RIGHT position) */
@@ -222,28 +229,7 @@
 
 @media (max-width: 767px) {
     .theme-switch {
-        --switch-width: 72px;
+        /* Only change height - width and toggle calculated automatically */
         --switch-height: 29px;
-        --toggle-size: 26px;
-        --toggle-offset: 2px;
-    }
-
-    .theme-switch__crater--1 {
-        width: 8px;
-        height: 8px;
-        top: 4px;
-        right: 6px;
-    }
-    .theme-switch__crater--2 {
-        width: 6px;
-        height: 6px;
-        bottom: 6px;
-        left: 5px;
-    }
-    .theme-switch__crater--3 {
-        width: 4px;
-        height: 4px;
-        bottom: 8px;
-        right: 5px;
     }
 }

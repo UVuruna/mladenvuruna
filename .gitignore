@@ -32,3 +32,14 @@ npm-debug.log*
 # Build
 dist/
 build/
+
+# Assets (source files, irrelevant data)
+assets/other/
+assets/img/material/
+
+# Temporary files
+tmp/
+temp/
+
+# Claude communication
+prompt.txt
