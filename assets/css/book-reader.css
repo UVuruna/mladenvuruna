@@ -1,0 +1,263 @@
+/**
+ * Book Reader Styles - StPageFlip Integration
+ * Clean, simple styles for the library-based book reader
+ */
+
+/* ==========================================================================
+   CSS Variables
+   ========================================================================== */
+
+:root {
+    --book-page-ratio: 0.65;
+    --book-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    --book-page-color: #f8f5ed;
+    --book-spine-color: #2a1f1a;
+}
+
+/* ==========================================================================
+   Book Container - Wrapper for each book
+   ========================================================================== */
+
+.book-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+/* When book is open, expand and center */
+.book-container.is-open {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.85);
+    min-height: 100vh;
+    padding: var(--spacing-md);
+}
+
+/* ==========================================================================
+   Book Cover - Closed State (clickable)
+   ========================================================================== */
+
+.book-cover {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+    /* 3D perspective */
+    transform-style: preserve-3d;
+    transform: perspective(1000px) rotateY(-5deg);
+}
+
+.book-cover:hover {
+    transform: perspective(1000px) rotateY(-10deg) translateY(-5px);
+}
+
+.book-cover img {
+    display: block;
+    max-width: 280px;
+    height: auto;
+    box-shadow: var(--book-shadow);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* Click hint */
+.book-cover-hint {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.book-cover:hover .book-cover-hint {
+    opacity: 1;
+}
+
+/* Hide cover when book is open */
+.book-container.is-open .book-cover {
+    display: none;
+}
+
+/* ==========================================================================
+   Flipbook - StPageFlip container
+   ========================================================================== */
+
+.book-flipbook {
+    display: none;
+}
+
+.book-container.is-open .book-flipbook {
+    display: block;
+}
+
+/* Page styling for StPageFlip */
+.book-flipbook .page {
+    background: var(--book-page-color);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.book-flipbook .page img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: var(--book-page-color);
+}
+
+/* Cover pages have special styling */
+.book-flipbook .page-cover {
+    background: linear-gradient(135deg, #3a2a1a 0%, #2a1f1a 100%);
+}
+
+.book-flipbook .page-cover img {
+    object-fit: cover;
+}
+
+/* ==========================================================================
+   Book Controls
+   ========================================================================== */
+
+.book-controls {
+    display: none;
+    position: fixed;
+    bottom: var(--spacing-lg);
+    left: 50%;
+    transform: translateX(-50%);
+    gap: var(--spacing-md);
+    z-index: 1001;
+}
+
+.book-container.is-open .book-controls {
+    display: flex;
+}
+
+.book-controls button {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-full);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    font-size: var(--font-size-xl);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.book-controls button:hover {
+    background: var(--color-accent);
+    color: var(--color-bg-primary);
+    border-color: var(--color-accent);
+    transform: scale(1.1);
+}
+
+.book-controls button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Close button - position at top right */
+.book-controls .btn-close {
+    position: fixed;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    left: auto;
+    transform: none;
+}
+
+/* ==========================================================================
+   Responsive - Mobile First
+   ========================================================================== */
+
+/* Mobile (portrait) - nearly full width */
+@media (max-width: 767px) {
+    .book-cover img {
+        max-width: min(85vw, 320px);
+    }
+
+    .book-controls button {
+        width: 44px;
+        height: 44px;
+        font-size: var(--font-size-lg);
+    }
+
+    .book-controls .btn-close {
+        top: var(--spacing-md);
+        right: var(--spacing-md);
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .book-cover img {
+        max-width: 90vw;
+    }
+
+    .book-container.is-open {
+        padding: var(--spacing-sm);
+    }
+}
+
+/* Tablet and Desktop */
+@media (min-width: 768px) {
+    .book-cover img {
+        max-width: 320px;
+    }
+
+    .book-container {
+        min-height: 500px;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1200px) {
+    .book-cover img {
+        max-width: 350px;
+    }
+}
+
+/* ==========================================================================
+   Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .book-cover,
+    .book-controls button {
+        transition: none;
+    }
+
+    .book-cover:hover {
+        transform: perspective(1000px) rotateY(-5deg);
+    }
+}
+
+/* ==========================================================================
+   StPageFlip Overrides
+   ========================================================================== */
+
+/* The library creates .stf__parent as the main container */
+.stf__parent {
+    margin: auto;
+}
+
+/* Make sure the book is centered in the viewport */
+.book-container.is-open .stf__parent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Page number indicator (if shown by library) */
+.stf__block {
+    box-shadow: var(--book-shadow);
+}

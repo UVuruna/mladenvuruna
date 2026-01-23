@@ -34,6 +34,11 @@
         <?php endforeach; ?>
     <?php endif; ?>
 
+    <!-- StPageFlip library (for book reader) -->
+    <?php if (in_array('book-reader', $styles ?? [])): ?>
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+    <?php endif; ?>
+
     <!-- Open Graph -->
     <meta property="og:title" content="<?php echo $pageTitle ?? 'Mladen Vuruna'; ?>">
     <meta property="og:description" content="<?php echo $pageDescription ?? 'Pisac i umetnik'; ?>">
