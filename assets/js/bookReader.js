@@ -1,5 +1,6 @@
 /**
- * BookReader - Using StPageFlip library
+ * BookReader - Using StPageFlip library with in-place animation
+ * v4 - Proper centering for 3 states + maximize size
  * https://github.com/Nodlik/StPageFlip
  */
 
@@ -12,9 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
 class BookReader {
     constructor(container) {
         this.container = container;
+        this.wrapper = container.closest('.book-wrapper');
+        this.stage = container.closest('.book-stage');
+        this.entry = container.closest('.book-entry');
         this.cover = container.querySelector('.book-cover');
         this.flipbookEl = container.querySelector('.book-flipbook');
-        this.controls = container.querySelector('.book-controls');
+        this.controls = this.entry.querySelector('.book-controls');
 
         this.pages = JSON.parse(container.dataset.pages || '[]');
         this.coverFront = container.dataset.front;
@@ -22,6 +26,12 @@ class BookReader {
 
         this.pageFlip = null;
         this.isOpen = false;
+        this.isAnimating = false;
+        this.currentState = 'closed'; // 'closed', 'front-cover', 'spread', 'back-cover'
+
+        // Timing constants (ms)
+        this.TRANSITION_DURATION = 400;
+        this.FLIP_DURATION = 800;
 
         this.init();
     }
@@ -40,7 +50,7 @@ class BookReader {
     }
 
     handleKeyDown(e) {
-        if (!this.isOpen) return;
+        if (!this.isOpen || this.isAnimating) return;
 
         switch (e.key) {
             case 'Escape':
@@ -55,25 +65,52 @@ class BookReader {
         }
     }
 
+    /**
+     * Calculate optimal page size to maximize available space
+     * Priority: max width, but constrain if height exceeds 95% of available
+     */
     getSize() {
-        // Responsive sizing
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const isLandscape = vw > vh;
+        const headerHeight = 80;
+        const padding = 40;
+        const controlsHeight = 80;
 
-        let width, height;
+        const availableWidth = this.stage.clientWidth;
+        const availableHeight = window.innerHeight - headerHeight - padding - controlsHeight;
+        const maxHeight = availableHeight * 0.95;
+
+        const aspectRatio = 0.65;
+        const isLandscape = window.innerWidth > window.innerHeight && window.innerWidth >= 768;
+
+        let pageWidth, pageHeight;
 
         if (isLandscape) {
-            // Desktop: 2-page view, each page ~30% of viewport width
-            height = Math.min(vh * 0.7, 600);
-            width = height * 0.65;
+            const maxTotalWidth = availableWidth;
+            pageWidth = maxTotalWidth / 2;
+            pageHeight = pageWidth / aspectRatio;
+
+            if (pageHeight > maxHeight) {
+                pageHeight = maxHeight;
+                pageWidth = pageHeight * aspectRatio;
+            }
         } else {
-            // Mobile: 1-page view, ~85% of viewport width
-            width = Math.min(vw * 0.85, 400);
-            height = width / 0.65;
+            // Mobile: use available width without extra reduction
+            pageWidth = availableWidth;
+            pageHeight = pageWidth / aspectRatio;
+
+            if (pageHeight > maxHeight) {
+                pageHeight = maxHeight;
+                pageWidth = pageHeight * aspectRatio;
+            }
         }
 
-        return { width: Math.round(width), height: Math.round(height) };
+        return {
+            width: Math.round(pageWidth),
+            height: Math.round(pageHeight)
+        };
+    }
+
+    isLandscape() {
+        return window.innerWidth > window.innerHeight && window.innerWidth >= 768;
     }
 
     buildPages() {
@@ -83,6 +120,7 @@ class BookReader {
         // Front cover
         const frontPage = document.createElement('div');
         frontPage.className = 'page page-cover';
+        frontPage.dataset.density = 'hard';
         frontPage.innerHTML = `<img src="${this.coverFront}" alt="Cover">`;
         this.flipbookEl.appendChild(frontPage);
 
@@ -97,43 +135,91 @@ class BookReader {
         // Back cover
         const backPage = document.createElement('div');
         backPage.className = 'page page-cover';
+        backPage.dataset.density = 'hard';
         backPage.innerHTML = `<img src="${this.coverBack}" alt="Back Cover">`;
         this.flipbookEl.appendChild(backPage);
     }
 
+    /**
+     * Update wrapper position based on current state
+     * - front-cover: center the single right page
+     * - spread: center the spine (middle)
+     * - back-cover: center the single left page
+     */
+    updateCentering(state) {
+        const size = this.getSize();
+        const isLandscape = this.isLandscape();
+
+        this.currentState = state;
+        this.wrapper.dataset.state = state;
+
+        if (!isLandscape) {
+            // Mobile: always centered, no translation needed
+            this.wrapper.style.transform = 'translateX(0)';
+            return;
+        }
+
+        // Desktop 2-page mode
+        switch (state) {
+            case 'front-cover':
+                // Single page on RIGHT side of container
+                // Need to shift LEFT so the page is centered
+                this.wrapper.style.transform = `translateX(-${size.width / 2}px)`;
+                break;
+
+            case 'spread':
+                // Both pages visible, center the spine (no translation)
+                this.wrapper.style.transform = 'translateX(0)';
+                break;
+
+            case 'back-cover':
+                // Single page on LEFT side of container
+                // Need to shift RIGHT so the page is centered
+                this.wrapper.style.transform = `translateX(${size.width / 2}px)`;
+                break;
+
+            default:
+                this.wrapper.style.transform = 'translateX(0)';
+        }
+    }
+
     open() {
-        if (this.isOpen) return;
+        if (this.isOpen || this.isAnimating) return;
+        this.isAnimating = true;
 
         const size = this.getSize();
-        const isLandscape = window.innerWidth > window.innerHeight;
+        const landscape = this.isLandscape();
 
+        // Set CSS variable for sizing
+        this.wrapper.style.setProperty('--page-width', `${size.width}px`);
+        this.wrapper.style.setProperty('--page-height', `${size.height}px`);
+
+        // Build pages
         this.buildPages();
 
-        // Hide cover, show flipbook
-        this.cover.style.display = 'none';
+        // Show flipbook
         this.flipbookEl.style.display = 'block';
-        this.controls.style.display = 'flex';
 
         // Initialize PageFlip
         this.pageFlip = new St.PageFlip(this.flipbookEl, {
             width: size.width,
             height: size.height,
-            size: 'stretch',
+            size: 'fixed',
             minWidth: 200,
-            maxWidth: 600,
+            maxWidth: 1000,
             minHeight: 300,
-            maxHeight: 900,
+            maxHeight: 1400,
             showCover: true,
             mobileScrollSupport: false,
             useMouseEvents: true,
             swipeDistance: 30,
             clickEventForward: true,
-            usePortrait: !isLandscape,
+            usePortrait: !landscape,
             startPage: 0,
             drawShadow: true,
-            flippingTime: 800,
+            flippingTime: this.FLIP_DURATION,
             startZIndex: 0,
-            autoSize: true,
+            autoSize: false,
             maxShadowOpacity: 0.5,
             showPageCorners: true,
         });
@@ -141,44 +227,77 @@ class BookReader {
         // Load pages
         this.pageFlip.loadFromHTML(this.flipbookEl.querySelectorAll('.page'));
 
+        // Listen for page changes to update centering
+        this.pageFlip.on('flip', (e) => {
+            const page = e.data;
+            const totalPages = this.pageFlip.getPageCount();
+
+            if (page === 0) {
+                this.updateCentering('front-cover');
+            } else if (page >= totalPages - 1) {
+                this.updateCentering('back-cover');
+            } else {
+                this.updateCentering('spread');
+            }
+        });
+
+        // Mark as open (CSS hides cover via .is-open class)
         this.isOpen = true;
-        this.container.classList.add('is-open');
+        this.wrapper.classList.add('is-open');
+        this.entry.classList.add('is-reading');
+
+        // Set initial centering state (front cover)
+        this.updateCentering('front-cover');
 
         // Add keyboard listener
         document.addEventListener('keydown', this.handleKeyDown);
 
-        // Flip to first content page
-        setTimeout(() => this.pageFlip.flip(1), 100);
+        // Wait a moment, then flip to first content page
+        setTimeout(() => {
+            this.pageFlip.flip(1);
+            this.isAnimating = false;
+        }, this.TRANSITION_DURATION);
     }
 
     close() {
-        if (!this.isOpen) return;
+        if (!this.isOpen || this.isAnimating) return;
+        this.isAnimating = true;
 
-        // Remove keyboard listener
         document.removeEventListener('keydown', this.handleKeyDown);
 
-        // Flip back to cover first
+        // Flip back to front cover
         this.pageFlip.flip(0);
 
+        // Wait for flip, then cleanup
         setTimeout(() => {
-            this.pageFlip.destroy();
-            this.pageFlip = null;
+            this.updateCentering('front-cover');
 
-            this.flipbookEl.style.display = 'none';
-            this.flipbookEl.innerHTML = '';
-            this.controls.style.display = 'none';
-            this.cover.style.display = 'block';
+            setTimeout(() => {
+                this.pageFlip.destroy();
+                this.pageFlip = null;
 
-            this.isOpen = false;
-            this.container.classList.remove('is-open');
-        }, 500);
+                this.flipbookEl.style.display = 'none';
+                this.flipbookEl.innerHTML = '';
+                this.cover.style.display = '';
+
+                this.isOpen = false;
+                this.isAnimating = false;
+                this.currentState = 'closed';
+                this.wrapper.classList.remove('is-open');
+                this.wrapper.dataset.state = 'closed';
+                this.wrapper.style.transform = '';
+                this.entry.classList.remove('is-reading');
+            }, this.TRANSITION_DURATION);
+        }, this.FLIP_DURATION);
     }
 
     prev() {
+        if (this.isAnimating) return;
         this.pageFlip?.flipPrev();
     }
 
     next() {
+        if (this.isAnimating) return;
         this.pageFlip?.flipNext();
     }
 }

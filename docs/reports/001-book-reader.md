@@ -1,8 +1,27 @@
 # Book Reader - Implementation Report
 
 **Date:** January 2026
-**Status:** v2 - StPageFlip Integration Complete
+**Status:** v3 - In-Place Animation Complete
 **Developer:** Claude Code
+
+---
+
+## v3 Update (January 2026)
+
+Fixed book reader to open **IN-PLACE** instead of fixed overlay:
+
+**Problem solved:**
+- Book was opening in a full-screen fixed overlay
+- Missing centering animation (cover should be centered, then move right)
+
+**Solution:**
+- Added `.book-stage` (flex center) and `.book-wrapper` (translateX animation)
+- Removed `position: fixed` overlay
+- Animation phases: centered → move right → flip open
+
+**Animation flow:**
+1. OPEN: Cover centered → wrapper translateX(pageWidth/2) → cover flips to page 1
+2. CLOSE: Flip to cover → wrapper translateX(0) → show cover
 
 ---
 

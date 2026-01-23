@@ -59,12 +59,7 @@
     border-bottom: none;
 }
 
-/* Book Container Wrapper */
-.book-entry .book-container {
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: var(--spacing-xl);
-}
+/* Book Stage - handled in book-reader.css */
 
 /* Book Info */
 .book-info {
@@ -160,11 +155,6 @@
         padding: var(--spacing-3xl) 0;
     }
 
-    .book-entry .book-container {
-        max-width: 500px;
-        margin-bottom: var(--spacing-2xl);
-    }
-
     .book-info {
         max-width: 700px;
     }
@@ -181,10 +171,6 @@
 
 /* Large Desktop */
 @media (min-width: 1024px) {
-    .book-entry .book-container {
-        max-width: 600px;
-    }
-
     .book-info {
         max-width: 800px;
     }

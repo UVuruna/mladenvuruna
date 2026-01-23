@@ -86,28 +86,34 @@ $worksInProgress = [
             <div class="container">
                 <?php foreach ($publishedBooks as $book): ?>
                 <article class="book-entry" id="<?php echo $book['slug']; ?>">
-                    <div class="book-container"
-                         data-id="<?php echo $book['id']; ?>"
-                         data-pages='<?php echo json_encode($book['pages']); ?>'
-                         data-front="<?php echo $book['cover_front']; ?>"
-                         data-back="<?php echo $book['cover_back']; ?>">
+                    <!-- Book stage centers everything -->
+                    <div class="book-stage">
+                        <!-- Book wrapper handles translateX animation -->
+                        <div class="book-wrapper">
+                            <div class="book-container"
+                                 data-id="<?php echo $book['id']; ?>"
+                                 data-pages='<?php echo json_encode($book['pages']); ?>'
+                                 data-front="<?php echo $book['cover_front']; ?>"
+                                 data-back="<?php echo $book['cover_back']; ?>">
 
-                        <!-- Cover (click to open) -->
-                        <div class="book-cover">
-                            <img src="<?php echo $book['cover_front']; ?>"
-                                 alt="<?php echo $book['title']; ?>">
-                            <span class="book-cover-hint">Klikni za čitanje</span>
+                                <!-- Cover (click to open) -->
+                                <div class="book-cover">
+                                    <img src="<?php echo $book['cover_front']; ?>"
+                                         alt="<?php echo $book['title']; ?>">
+                                    <span class="book-cover-hint">Klikni za čitanje</span>
+                                </div>
+
+                                <!-- Flipbook container (StPageFlip renders here) -->
+                                <div class="book-flipbook"></div>
+                            </div>
                         </div>
+                    </div>
 
-                        <!-- Flipbook container -->
-                        <div class="book-flipbook"></div>
-
-                        <!-- Controls -->
-                        <div class="book-controls">
-                            <button class="btn-prev" aria-label="Prethodna">‹</button>
-                            <button class="btn-close" aria-label="Zatvori">✕</button>
-                            <button class="btn-next" aria-label="Sledeća">›</button>
-                        </div>
+                    <!-- Controls (outside stage for proper positioning) -->
+                    <div class="book-controls">
+                        <button class="btn-prev" aria-label="Prethodna">‹</button>
+                        <button class="btn-close" aria-label="Zatvori">✕</button>
+                        <button class="btn-next" aria-label="Sledeća">›</button>
                     </div>
 
                     <div class="book-info">
@@ -133,21 +139,25 @@ $worksInProgress = [
                 <h2 class="section-title">Radovi u Toku</h2>
                 <?php foreach ($worksInProgress as $book): ?>
                 <article class="book-entry" id="<?php echo $book['slug']; ?>">
-                    <div class="book-container"
-                         data-id="<?php echo $book['id']; ?>"
-                         data-pages='<?php echo json_encode($book['pages']); ?>'
-                         data-front="<?php echo $book['cover_front']; ?>"
-                         data-back="<?php echo $book['cover_back']; ?>">
-                        <div class="book-cover">
-                            <img src="<?php echo $book['cover_front']; ?>" alt="<?php echo $book['title']; ?>">
-                            <span class="book-cover-hint">Klikni za čitanje</span>
+                    <div class="book-stage">
+                        <div class="book-wrapper">
+                            <div class="book-container"
+                                 data-id="<?php echo $book['id']; ?>"
+                                 data-pages='<?php echo json_encode($book['pages']); ?>'
+                                 data-front="<?php echo $book['cover_front']; ?>"
+                                 data-back="<?php echo $book['cover_back']; ?>">
+                                <div class="book-cover">
+                                    <img src="<?php echo $book['cover_front']; ?>" alt="<?php echo $book['title']; ?>">
+                                    <span class="book-cover-hint">Klikni za čitanje</span>
+                                </div>
+                                <div class="book-flipbook"></div>
+                            </div>
                         </div>
-                        <div class="book-flipbook"></div>
-                        <div class="book-controls">
-                            <button class="btn-prev">‹</button>
-                            <button class="btn-close">✕</button>
-                            <button class="btn-next">›</button>
-                        </div>
+                    </div>
+                    <div class="book-controls">
+                        <button class="btn-prev" aria-label="Prethodna">‹</button>
+                        <button class="btn-close" aria-label="Zatvori">✕</button>
+                        <button class="btn-next" aria-label="Sledeća">›</button>
                     </div>
                     <div class="book-info">
                         <h2><?php echo $book['title']; ?></h2>

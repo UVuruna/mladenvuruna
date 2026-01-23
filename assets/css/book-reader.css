@@ -1,6 +1,6 @@
 /**
- * Book Reader Styles - StPageFlip Integration
- * Clean, simple styles for the library-based book reader
+ * Book Reader Styles - StPageFlip In-Place Animation
+ * v4 - State-based centering + maximize size
  */
 
 /* ==========================================================================
@@ -11,30 +11,39 @@
     --book-page-ratio: 0.65;
     --book-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     --book-page-color: #f8f5ed;
-    --book-spine-color: #2a1f1a;
+    --book-transition-duration: 0.4s;
+    --book-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ==========================================================================
-   Book Container - Wrapper for each book
+   Book Stage - Centers the book, provides available space
+   ========================================================================== */
+
+.book-stage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 400px;
+    /* No padding - container already has padding */
+    overflow: visible;
+}
+
+/* ==========================================================================
+   Book Wrapper - Handles translateX for centering different states
+   ========================================================================== */
+
+.book-wrapper {
+    position: relative;
+    transition: transform var(--book-transition-duration) var(--book-transition-easing);
+}
+
+/* ==========================================================================
+   Book Container
    ========================================================================== */
 
 .book-container {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-}
-
-/* When book is open, expand and center */
-.book-container.is-open {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    background: rgba(0, 0, 0, 0.85);
-    min-height: 100vh;
-    padding: var(--spacing-md);
 }
 
 /* ==========================================================================
@@ -46,7 +55,7 @@
     cursor: pointer;
     transition: transform 0.3s ease;
 
-    /* 3D perspective */
+    /* 3D perspective tilt */
     transform-style: preserve-3d;
     transform: perspective(1000px) rotateY(-5deg);
 }
@@ -59,6 +68,7 @@
     display: block;
     max-width: 280px;
     height: auto;
+    object-fit: cover;
     box-shadow: var(--book-shadow);
     border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
@@ -81,7 +91,7 @@
 }
 
 /* Hide cover when book is open */
-.book-container.is-open .book-cover {
+.book-wrapper.is-open .book-cover {
     display: none;
 }
 
@@ -93,7 +103,7 @@
     display: none;
 }
 
-.book-container.is-open .book-flipbook {
+.book-wrapper.is-open .book-flipbook {
     display: block;
 }
 
@@ -111,7 +121,7 @@
     background: var(--book-page-color);
 }
 
-/* Cover pages have special styling */
+/* Cover pages styling */
 .book-flipbook .page-cover {
     background: linear-gradient(135deg, #3a2a1a 0%, #2a1f1a 100%);
 }
@@ -126,15 +136,12 @@
 
 .book-controls {
     display: none;
-    position: fixed;
-    bottom: var(--spacing-lg);
-    left: 50%;
-    transform: translateX(-50%);
+    justify-content: center;
     gap: var(--spacing-md);
-    z-index: 1001;
+    padding: var(--spacing-md) 0;
 }
 
-.book-container.is-open .book-controls {
+.book-entry.is-reading .book-controls {
     display: flex;
 }
 
@@ -165,63 +172,19 @@
     outline-offset: 2px;
 }
 
-/* Close button - position at top right */
-.book-controls .btn-close {
-    position: fixed;
-    top: var(--spacing-lg);
-    right: var(--spacing-lg);
-    left: auto;
-    transform: none;
-}
-
 /* ==========================================================================
-   Responsive - Mobile First
+   Responsive - Mobile
    ========================================================================== */
 
-/* Mobile (portrait) - nearly full width */
-@media (max-width: 767px) {
+@media (max-width: 767px), (orientation: portrait) {
     .book-cover img {
-        max-width: min(85vw, 320px);
+        max-width: 100%;
     }
 
     .book-controls button {
         width: 44px;
         height: 44px;
         font-size: var(--font-size-lg);
-    }
-
-    .book-controls .btn-close {
-        top: var(--spacing-md);
-        right: var(--spacing-md);
-    }
-}
-
-/* Small mobile */
-@media (max-width: 480px) {
-    .book-cover img {
-        max-width: 90vw;
-    }
-
-    .book-container.is-open {
-        padding: var(--spacing-sm);
-    }
-}
-
-/* Tablet and Desktop */
-@media (min-width: 768px) {
-    .book-cover img {
-        max-width: 320px;
-    }
-
-    .book-container {
-        min-height: 500px;
-    }
-}
-
-/* Large Desktop */
-@media (min-width: 1200px) {
-    .book-cover img {
-        max-width: 350px;
     }
 }
 
@@ -230,6 +193,7 @@
    ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
+    .book-wrapper,
     .book-cover,
     .book-controls button {
         transition: none;
@@ -244,20 +208,12 @@
    StPageFlip Overrides
    ========================================================================== */
 
-/* The library creates .stf__parent as the main container */
+/* Library container - remove any default margins */
 .stf__parent {
-    margin: auto;
+    margin: 0 !important;
 }
 
-/* Make sure the book is centered in the viewport */
-.book-container.is-open .stf__parent {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-/* Page number indicator (if shown by library) */
+/* Shadow styling */
 .stf__block {
     box-shadow: var(--book-shadow);
 }
