@@ -213,7 +213,11 @@
     margin: 0 !important;
 }
 
-/* Shadow styling */
-.stf__block {
-    box-shadow: var(--book-shadow);
+/* Shadow on individual pages - hidden page = no shadow */
+.stf__item.--left.--simple {
+    box-shadow: -5px 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+.stf__item.--right.--simple {
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3);
 }
