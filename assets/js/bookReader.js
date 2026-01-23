@@ -184,11 +184,60 @@ class BookReader {
     }
 
     open() {
-        if (this.isOpen || this.isAnimating) return;
+        console.log('=== OPEN START ===');
+        console.log('isOpen:', this.isOpen, 'isAnimating:', this.isAnimating);
+
+        if (this.isOpen || this.isAnimating) {
+            console.log('BLOCKED - already open or animating');
+            return;
+        }
         this.isAnimating = true;
 
         const size = this.getSize();
         const landscape = this.isLandscape();
+        console.log('Size:', size, 'Landscape:', landscape);
+
+        // SAFETY: Clean up any leftover StPageFlip elements from previous session
+        console.log('Cleaning up previous session...');
+        console.log('pageFlip exists:', !!this.pageFlip);
+
+        if (this.pageFlip) {
+            try {
+                this.pageFlip.destroy();
+                console.log('pageFlip.destroy() called');
+            } catch (e) {
+                console.error('PageFlip cleanup ERROR:', e);
+            }
+            this.pageFlip = null;
+        }
+
+        // Re-find flipbookEl in case it was corrupted or removed
+        // This ensures we always have a valid reference
+        let flipbook = this.container.querySelector('.book-flipbook');
+        if (!flipbook) {
+            console.log('flipbookEl not found, creating new one...');
+            flipbook = document.createElement('div');
+            flipbook.className = 'book-flipbook';
+            this.container.appendChild(flipbook);
+        }
+        this.flipbookEl = flipbook;
+
+        // Clean any stray stf__ elements everywhere
+        this.container.querySelectorAll('[class*="stf__"]').forEach(el => {
+            console.log('Removing stf element:', el.className);
+            el.remove();
+        });
+        this.stage.querySelectorAll('[class*="stf__"]').forEach(el => {
+            console.log('Removing stf element from stage:', el.className);
+            el.remove();
+        });
+
+        // Reset flipbook element completely
+        this.flipbookEl.innerHTML = '';
+        this.flipbookEl.style.cssText = '';
+        this.flipbookEl.className = 'book-flipbook'; // Reset class in case library modified it
+
+        console.log('Cleanup done. flipbookEl ready:', !!this.flipbookEl.parentNode);
 
         // Set CSS variable for sizing
         this.wrapper.style.setProperty('--page-width', `${size.width}px`);
@@ -196,11 +245,15 @@ class BookReader {
 
         // Build pages
         this.buildPages();
+        console.log('Pages built. flipbookEl children:', this.flipbookEl.children.length);
+        console.log('Page elements:', this.flipbookEl.querySelectorAll('.page').length);
 
         // Show flipbook
         this.flipbookEl.style.display = 'block';
+        console.log('flipbookEl display set to block');
 
         // Initialize PageFlip
+        console.log('Creating new St.PageFlip...');
         this.pageFlip = new St.PageFlip(this.flipbookEl, {
             width: size.width,
             height: size.height,
@@ -223,14 +276,25 @@ class BookReader {
             maxShadowOpacity: 0.5,
             showPageCorners: true,
         });
+        console.log('PageFlip created:', this.pageFlip);
 
         // Load pages
-        this.pageFlip.loadFromHTML(this.flipbookEl.querySelectorAll('.page'));
+        const pageElements = this.flipbookEl.querySelectorAll('.page');
+        console.log('Loading pages from HTML, count:', pageElements.length);
+        this.pageFlip.loadFromHTML(pageElements);
+        console.log('loadFromHTML done');
+        console.log('PageFlip page count:', this.pageFlip.getPageCount());
+
+        // Check what StPageFlip created
+        console.log('stf__ elements AFTER loadFromHTML:', this.container.querySelectorAll('[class*="stf__"]').length);
+        console.log('flipbookEl innerHTML length AFTER loadFromHTML:', this.flipbookEl.innerHTML.length);
+        console.log('flipbookEl children AFTER loadFromHTML:', this.flipbookEl.children.length);
 
         // Listen for page changes to update centering
         this.pageFlip.on('flip', (e) => {
             const page = e.data;
             const totalPages = this.pageFlip.getPageCount();
+            console.log('FLIP event - page:', page, 'total:', totalPages);
 
             if (page === 0) {
                 this.updateCentering('front-cover');
@@ -245,6 +309,7 @@ class BookReader {
         this.isOpen = true;
         this.wrapper.classList.add('is-open');
         this.entry.classList.add('is-reading');
+        console.log('Classes added. wrapper.is-open:', this.wrapper.classList.contains('is-open'));
 
         // Set initial centering state (front cover)
         this.updateCentering('front-cover');
@@ -254,32 +319,70 @@ class BookReader {
 
         // Wait a moment, then flip to first content page
         setTimeout(() => {
+            console.log('Flipping to page 1...');
             this.pageFlip.flip(1);
             this.isAnimating = false;
+            console.log('=== OPEN COMPLETE ===');
         }, this.TRANSITION_DURATION);
     }
 
     close() {
-        if (!this.isOpen || this.isAnimating) return;
+        console.log('=== CLOSE START ===');
+        console.log('isOpen:', this.isOpen, 'isAnimating:', this.isAnimating);
+
+        if (!this.isOpen || this.isAnimating) {
+            console.log('BLOCKED - not open or animating');
+            return;
+        }
         this.isAnimating = true;
 
         document.removeEventListener('keydown', this.handleKeyDown);
 
         // Flip back to front cover
+        console.log('Flipping to page 0...');
         this.pageFlip.flip(0);
 
         // Wait for flip, then cleanup
         setTimeout(() => {
+            console.log('First timeout done (FLIP_DURATION)');
             this.updateCentering('front-cover');
 
             setTimeout(() => {
-                this.pageFlip.destroy();
-                this.pageFlip = null;
+                console.log('Second timeout done (TRANSITION_DURATION)');
 
-                this.flipbookEl.style.display = 'none';
-                this.flipbookEl.innerHTML = '';
+                try {
+                    // Destroy PageFlip instance
+                    if (this.pageFlip) {
+                        console.log('Calling pageFlip.destroy()...');
+                        this.pageFlip.destroy();
+                        this.pageFlip = null;
+                    }
+
+                    // Clean up ALL stf__ elements from entire stage
+                    this.stage.querySelectorAll('[class*="stf__"]').forEach(el => {
+                        console.log('Removing:', el.className);
+                        el.remove();
+                    });
+
+                    // Ensure flipbookEl exists and is clean
+                    let flipbook = this.container.querySelector('.book-flipbook');
+                    if (!flipbook) {
+                        console.log('flipbookEl was removed, recreating...');
+                        flipbook = document.createElement('div');
+                        flipbook.className = 'book-flipbook';
+                        this.container.appendChild(flipbook);
+                    }
+                    this.flipbookEl = flipbook;
+                    this.flipbookEl.innerHTML = '';
+                    this.flipbookEl.style.cssText = '';
+                    this.flipbookEl.className = 'book-flipbook';
+
+                } catch (e) {
+                    console.error('Cleanup error:', e);
+                }
+
+                // Reset state - ALWAYS do this, even if cleanup had errors
                 this.cover.style.display = '';
-
                 this.isOpen = false;
                 this.isAnimating = false;
                 this.currentState = 'closed';
@@ -287,6 +390,8 @@ class BookReader {
                 this.wrapper.dataset.state = 'closed';
                 this.wrapper.style.transform = '';
                 this.entry.classList.remove('is-reading');
+
+                console.log('=== CLOSE COMPLETE ===');
             }, this.TRANSITION_DURATION);
         }, this.FLIP_DURATION);
     }
