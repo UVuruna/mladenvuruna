@@ -70,13 +70,10 @@ class BookReader {
      * Priority: max width, but constrain if height exceeds 95% of available
      */
     getSize() {
-        const headerHeight = 80;
-        const padding = 40;
-        const controlsHeight = 80;
-
+        // Use actual stage dimensions, not window calculations
         const availableWidth = this.stage.clientWidth;
-        const availableHeight = window.innerHeight - headerHeight - padding - controlsHeight;
-        const maxHeight = availableHeight * 0.95;
+        const availableHeight = this.stage.clientHeight;
+        const maxHeight = availableHeight;
 
         const aspectRatio = 0.65;
         const isLandscape = window.innerWidth > window.innerHeight && window.innerWidth >= 768;
@@ -193,6 +190,16 @@ class BookReader {
         }
         this.isAnimating = true;
 
+        // FIRST: Add is-reading class to hide book-info and get full space
+        this.entry.classList.add('is-reading');
+
+        // Wait for layout to update, then calculate size
+        requestAnimationFrame(() => {
+            this._initializePageFlip();
+        });
+    }
+
+    _initializePageFlip() {
         const size = this.getSize();
         const landscape = this.isLandscape();
         console.log('Size:', size, 'Landscape:', landscape);
@@ -308,7 +315,7 @@ class BookReader {
         // Mark as open (CSS hides cover via .is-open class)
         this.isOpen = true;
         this.wrapper.classList.add('is-open');
-        this.entry.classList.add('is-reading');
+        // is-reading already added in open()
         console.log('Classes added. wrapper.is-open:', this.wrapper.classList.contains('is-open'));
 
         // Set initial centering state (front cover)
