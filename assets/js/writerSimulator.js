@@ -123,17 +123,9 @@ class WriterSimulator {
     }
 
     setupScrollTrigger() {
-        this.observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !this.hasAnimated && !this.isAnimating) {
-                        this.start();
-                    }
-                });
-            },
-            { threshold: this.options.scrollTrigger.threshold }
-        );
-        this.observer.observe(this.container);
+        // Queue handles when to start - no auto-start here
+        // Just mark container as waiting
+        this.container.classList.add('waiting-to-animate');
     }
 
     /**
@@ -172,6 +164,7 @@ class WriterSimulator {
         if (this.isAnimating || this.hasAnimated) return;
 
         this.isAnimating = true;
+        this.container.classList.remove('waiting-to-animate');
         this.container.classList.add('is-animating');
 
         if (this.mode === 'handwriting') {
@@ -341,11 +334,15 @@ class WriterSimulator {
 
         this.container.classList.remove('is-animating');
         this.container.classList.remove('handwriting-mode');
+        this.container.classList.remove('waiting-to-animate');
         this.container.classList.add('has-animated');
 
         if (this.observer) {
             this.observer.disconnect();
         }
+
+        // Notify queue to start next animation
+        WriterSimulatorQueue.onComplete();
     }
 
     destroy() {
@@ -355,6 +352,46 @@ class WriterSimulator {
         this.container.classList.remove('is-animating', 'has-animated', 'handwriting-mode');
     }
 }
+
+/**
+ * Queue manager - only one animation at a time
+ */
+const WriterSimulatorQueue = {
+    instances: [],
+    currentIndex: -1,
+    isAnimating: false,
+
+    add(instance) {
+        this.instances.push(instance);
+    },
+
+    startNext() {
+        if (this.isAnimating) return;
+
+        // Find next instance that hasn't animated yet
+        for (let i = 0; i < this.instances.length; i++) {
+            const instance = this.instances[i];
+            if (!instance.hasAnimated && !instance.isAnimating) {
+                // Check if visible
+                const rect = instance.container.getBoundingClientRect();
+                const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+
+                if (isVisible) {
+                    this.currentIndex = i;
+                    this.isAnimating = true;
+                    instance.start();
+                    return;
+                }
+            }
+        }
+    },
+
+    onComplete() {
+        this.isAnimating = false;
+        // Small delay before starting next
+        setTimeout(() => this.startNext(), 500);
+    }
+};
 
 /**
  * Initialize on page load
@@ -373,7 +410,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (settings.enabled === false) return;
 
+    // Create instances and add to queue
     document.querySelectorAll('.essay-entry').forEach(container => {
-        new WriterSimulator(container, settings);
+        const instance = new WriterSimulator(container, settings);
+        WriterSimulatorQueue.add(instance);
     });
+
+    // Start first visible on scroll
+    const checkScroll = () => {
+        WriterSimulatorQueue.startNext();
+    };
+
+    window.addEventListener('scroll', checkScroll, { passive: true });
+    checkScroll(); // Check immediately
 });

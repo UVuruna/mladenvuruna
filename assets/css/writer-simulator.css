@@ -334,6 +334,22 @@
 }
 
 /* ==========================================================================
+   Waiting State (Queue - only title visible until animation starts)
+   ========================================================================== */
+
+.essay-entry.waiting-to-animate .essay-content {
+    display: none;
+}
+
+.essay-entry.waiting-to-animate .essay-skip {
+    display: none;
+}
+
+.essay-entry.waiting-to-animate .essay-mode-toggle {
+    display: none;
+}
+
+/* ==========================================================================
    Loading State
    ========================================================================== */
 
