@@ -5,34 +5,20 @@
     "typewriter": {
         "speed": 50,
         "startDelay": 500,
-        "cursorChar": "|",
-        "cursorBlink": true
+        "cursorChar": "|"
     },
 
     "handwriting": {
-        "duration": 3000,
-        "delay": 200,
-        "strokeWidth": 2,
-        "color": "#2a1a0a",
-        "font": "Satisfy",
-        "fontSize": 28
+        "speed": 40,
+        "startDelay": 500
     },
 
     "pen": {
-        "enabled": true,
-        "offsetX": -8,
-        "offsetY": -45
-    },
-
-    "parchment": {
-        "enabled": true,
-        "backgroundColor": "#fffef0",
-        "inkColor": "#2a1a0a",
-        "shadowEnabled": true
+        "offsetX": -5,
+        "offsetY": -50
     },
 
     "scrollTrigger": {
-        "threshold": 0.3,
-        "rootMargin": "0px"
+        "threshold": 0.3
     }
 }

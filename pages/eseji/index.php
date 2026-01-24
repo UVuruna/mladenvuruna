@@ -12,7 +12,7 @@ $pageTitle = 'Eseji';
 $pageDescription = 'Mladen Vuruna - Eseji. Razmišljanja o životu, umetnosti i pisanju.';
 
 $styles = ['writer-simulator'];
-$libraries = ['typed.min', 'vara.min'];
+$libraries = ['typed.min'];
 $scripts = ['writerSimulator'];
 
 // Placeholder essays for testing

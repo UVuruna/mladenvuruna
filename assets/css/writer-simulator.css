@@ -3,6 +3,9 @@
  * Includes parchment effect, typewriter cursor, and pen positioning
  */
 
+/* Google Font for handwriting mode */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500&display=swap');
+
 /* ==========================================================================
    Essays Page Layout
    ========================================================================== */
@@ -294,18 +297,22 @@
 }
 
 /* ==========================================================================
-   Handwriting Mode - Vara.js Container
+   Handwriting Mode - Cursive Font
    ========================================================================== */
 
-.essay-content svg {
-    width: 100%;
-    overflow: visible;
+/* Apply cursive font in handwriting mode */
+.essay-entry.handwriting-mode .essay-content,
+.essay-entry.handwriting-mode .essay-content .typed-wrapper {
+    font-family: 'Dancing Script', cursive;
+    font-size: calc(var(--font-size-lg) * 1.3);
+    line-height: 1.8;
+    text-align: left;
 }
 
-.essay-content svg text,
-.essay-content svg path {
-    fill: none;
-    stroke: #2a1a0a;
+/* Title also gets cursive in handwriting mode during animation */
+.essay-entry.handwriting-mode .essay-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: calc(var(--font-size-2xl) * 1.2);
 }
 
 /* ==========================================================================
