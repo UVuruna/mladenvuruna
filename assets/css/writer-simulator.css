@@ -96,7 +96,7 @@
         0 4px 6px rgba(0, 0, 0, 0.1),
         0 12px 20px rgba(0, 0, 0, 0.1),
         inset 0 0 80px rgba(138, 77, 15, 0.08);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* Paper texture overlay using CSS noise */
@@ -178,6 +178,7 @@
     position: relative;
     padding: var(--spacing-xl) var(--spacing-2xl);
     min-height: 300px;
+    overflow: visible;
 }
 
 /* Essay title */
@@ -245,33 +246,24 @@
    ========================================================================== */
 
 .essay-pen {
+    --pen-rot-min: 27deg;
+    --pen-rot-max: 35deg;
     position: absolute;
-    width: 50px;
-    height: 80px;
+    width: 100px;
+    height: auto;
     pointer-events: none;
-    z-index: 10;
+    z-index: 100;
     opacity: 0;
     visibility: hidden;
-    transform: rotate(-30deg) translateZ(0);
+    transform: rotate(30deg);
     transform-origin: bottom center;
     will-change: left, top;
     filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.3));
 }
 
-/* Show pen in handwriting mode */
-.essay-entry.handwriting-mode .essay-pen {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Slight pen movement animation while writing */
-.essay-entry.handwriting-mode.is-animating .essay-pen {
-    animation: pen-writing 0.15s ease-in-out infinite alternate;
-}
-
 @keyframes pen-writing {
-    0% { transform: rotate(-32deg); }
-    100% { transform: rotate(-28deg); }
+    0% { transform: rotate(var(--pen-rot-min, 27deg)); }
+    100% { transform: rotate(var(--pen-rot-max, 35deg)); }
 }
 
 /* ==========================================================================
@@ -400,8 +392,8 @@
     }
 
     .essay-pen {
-        width: 40px;
-        height: 65px;
+        width: 70px;
+        height: auto;
     }
 
     .essay-mode-toggle {

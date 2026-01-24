@@ -52,13 +52,13 @@ $showToggle = empty($essayMode);
             <button type="button" class="essay-skip" aria-label="Preskoči animaciju">
                 Preskoči <span aria-hidden="true">›</span>
             </button>
-        </div>
 
-        <!-- Quill Pen (for handwriting mode) -->
-        <img src="<?php echo $basePath; ?>assets/img/svg/quill.svg"
-             class="essay-pen"
-             alt=""
-             aria-hidden="true">
+            <!-- Quill Pen (for handwriting mode) -->
+            <img src="<?php echo $basePath; ?>assets/img/svg/quill.svg"
+                 class="essay-pen"
+                 alt=""
+                 aria-hidden="true">
+        </div>
     </div>
 
     <?php if (!empty($essay['author'])): ?>

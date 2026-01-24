@@ -51,8 +51,13 @@ class WriterSimulator {
                 cursorChar: ''  // No cursor for handwriting, pen instead
             },
             pen: {
+                width: 100,
+                mobileWidth: 70,
                 offsetX: -5,
-                offsetY: -50
+                offsetY: -50,
+                animationDuration: 0.3,
+                rotationMin: 27,
+                rotationMax: 35
             },
             scrollTrigger: {
                 threshold: 0.3
@@ -72,6 +77,7 @@ class WriterSimulator {
     init() {
         // Get DOM elements
         this.parchment = this.container.querySelector('.essay-parchment');
+        this.paper = this.container.querySelector('.essay-paper');
         this.contentEl = this.container.querySelector('.essay-content');
         this.pen = this.container.querySelector('.essay-pen');
         this.skipBtn = this.container.querySelector('.essay-skip');
@@ -219,10 +225,25 @@ class WriterSimulator {
         this.typedWrapper.className = 'typed-wrapper';
         this.contentEl.appendChild(this.typedWrapper);
 
-        // Show pen
+        // Setup pen (don't show yet - will show when text starts)
         if (this.pen) {
-            this.pen.style.opacity = '1';
-            this.pen.style.visibility = 'visible';
+            // Keep pen hidden until positioned
+            this.pen.style.opacity = '0';
+            this.pen.style.visibility = 'hidden';
+
+            // Apply pen settings from config
+            const isMobile = window.innerWidth < 768;
+            const penWidth = isMobile ? this.options.pen.mobileWidth : this.options.pen.width;
+            this.pen.style.width = `${penWidth}px`;
+
+            // Apply animation settings from config
+            const duration = this.options.pen.animationDuration || 0.3;
+            const rotMin = this.options.pen.rotationMin || 27;
+            const rotMax = this.options.pen.rotationMax || 35;
+            this.pen.style.animation = `pen-writing ${duration}s ease-in-out infinite alternate`;
+            this.pen.style.setProperty('--pen-rot-min', `${rotMin}deg`);
+            this.pen.style.setProperty('--pen-rot-max', `${rotMax}deg`);
+
             this.startPenTracking();
         }
 
@@ -245,7 +266,7 @@ class WriterSimulator {
      * Track pen position by finding the last character position
      */
     startPenTracking() {
-        if (!this.pen || !this.typedWrapper) return;
+        if (!this.pen || !this.typedWrapper || !this.paper) return;
 
         const updatePen = () => {
             if (!this.isAnimating) {
@@ -253,40 +274,36 @@ class WriterSimulator {
                 return;
             }
 
-            // Get the bounding rect of the typed wrapper
-            const wrapperRect = this.typedWrapper.getBoundingClientRect();
-            const parchmentRect = this.parchment.getBoundingClientRect();
-
-            // Create a temporary range to find the end of text
-            const text = this.typedWrapper.innerHTML;
-            if (text.length === 0) {
-                this.penTrackingInterval = requestAnimationFrame(updatePen);
-                return;
-            }
-
-            // Position pen at the end of text
-            // We approximate by using wrapper's right edge
-            const selection = window.getSelection();
-            const range = document.createRange();
-
-            // Find last text node
+            // Find last text node in typed wrapper
             let lastNode = this.typedWrapper;
             while (lastNode.lastChild) {
                 lastNode = lastNode.lastChild;
             }
 
             if (lastNode.nodeType === Node.TEXT_NODE && lastNode.length > 0) {
+                const range = document.createRange();
                 range.setStart(lastNode, lastNode.length);
                 range.setEnd(lastNode, lastNode.length);
                 const rects = range.getClientRects();
 
                 if (rects.length > 0) {
                     const lastRect = rects[rects.length - 1];
-                    const penX = lastRect.right - parchmentRect.left + this.options.pen.offsetX;
-                    const penY = lastRect.top - parchmentRect.top + this.options.pen.offsetY;
+                    const paperRect = this.paper.getBoundingClientRect();
+                    const penHeight = this.pen.offsetHeight || 0;
+
+                    // Calculate position relative to paper element
+                    // Pen tip (bottom) should be at cursor, so subtract pen height
+                    const penX = lastRect.right - paperRect.left + this.options.pen.offsetX;
+                    const penY = lastRect.top - paperRect.top - penHeight + this.options.pen.offsetY;
 
                     this.pen.style.left = `${penX}px`;
                     this.pen.style.top = `${penY}px`;
+
+                    // Show pen only after we have position
+                    if (this.pen.style.opacity !== '1') {
+                        this.pen.style.opacity = '1';
+                        this.pen.style.visibility = 'visible';
+                    }
                 }
             }
 
@@ -301,8 +318,12 @@ class WriterSimulator {
             cancelAnimationFrame(this.penTrackingInterval);
             this.penTrackingInterval = null;
         }
+    }
+
+    removePen() {
         if (this.pen) {
-            this.pen.style.opacity = '0';
+            this.pen.remove();
+            this.pen = null;
         }
     }
 
@@ -329,6 +350,7 @@ class WriterSimulator {
 
     onComplete() {
         this.stopPenTracking();
+        this.removePen();  // Remove pen from DOM - it's never used again
         this.isAnimating = false;
         this.hasAnimated = true;
 
@@ -347,6 +369,7 @@ class WriterSimulator {
 
     destroy() {
         this.stopPenTracking();
+        this.removePen();
         if (this.typed) this.typed.destroy();
         if (this.observer) this.observer.disconnect();
         this.container.classList.remove('is-animating', 'has-animated', 'handwriting-mode');

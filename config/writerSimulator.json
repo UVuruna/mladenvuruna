@@ -14,8 +14,13 @@
     },
 
     "pen": {
-        "offsetX": -5,
-        "offsetY": -50
+        "width": 100,
+        "mobileWidth": 70,
+        "offsetX": 5,
+        "offsetY": 20,
+        "animationDuration": 0.3,
+        "rotationMin": 27,
+        "rotationMax": 35
     },
 
     "scrollTrigger": {
