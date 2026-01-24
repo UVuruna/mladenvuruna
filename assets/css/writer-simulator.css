@@ -326,6 +326,73 @@
 }
 
 /* ==========================================================================
+   Cursive Text Mode (After animation completes)
+   ========================================================================== */
+
+/* Keep cursive font after handwriting animation */
+.essay-entry.cursive-text .essay-content {
+    font-family: 'Dancing Script', cursive;
+    font-size: calc(var(--font-size-lg) * 1.3);
+    line-height: 1.8;
+    text-align: left;
+}
+
+.essay-entry.cursive-text .essay-title {
+    font-family: 'Dancing Script', cursive;
+    font-size: calc(var(--font-size-2xl) * 1.2);
+}
+
+/* Normal text mode (when toggled) */
+.essay-entry.normal-text .essay-content {
+    font-family: var(--font-primary);
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+}
+
+.essay-entry.normal-text .essay-title {
+    font-family: var(--font-primary);
+    font-size: var(--font-size-2xl);
+}
+
+/* ==========================================================================
+   Font Toggle Button
+   ========================================================================== */
+
+.essay-font-toggle {
+    position: absolute;
+    bottom: var(--spacing-md);
+    right: var(--spacing-lg);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-family: var(--font-primary);
+    font-size: var(--font-size-sm);
+    color: #5a4a3a;
+    background: rgba(255, 254, 240, 0.8);
+    border: 1px solid rgba(139, 115, 85, 0.3);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.essay-font-toggle:hover {
+    background: rgba(255, 254, 240, 0.95);
+    border-color: rgba(139, 115, 85, 0.5);
+    color: #3a2a1a;
+}
+
+.essay-font-toggle .toggle-icon {
+    display: inline-block;
+    font-weight: 500;
+}
+
+/* Show cursive icon when in normal mode */
+.essay-entry.normal-text .essay-font-toggle .toggle-icon {
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.1em;
+}
+
+/* ==========================================================================
    Waiting State (Queue - only title visible until animation starts)
    ========================================================================== */
 
@@ -404,6 +471,17 @@
         font-size: var(--font-size-xs);
         padding: var(--spacing-xs) var(--spacing-sm);
     }
+
+    .essay-font-toggle {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        right: var(--spacing-md);
+    }
+
+    /* Smaller cursive on mobile */
+    .essay-entry.cursive-text .essay-content {
+        font-size: calc(var(--font-size-base) * 1.2);
+    }
 }
 
 /* ==========================================================================
@@ -413,7 +491,8 @@
 @media print {
     .essay-mode-toggle,
     .essay-skip,
-    .essay-pen {
+    .essay-pen,
+    .essay-font-toggle {
         display: none !important;
     }
 

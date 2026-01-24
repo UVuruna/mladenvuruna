@@ -327,6 +327,30 @@ class WriterSimulator {
         }
     }
 
+    showFontToggle() {
+        // Create font toggle button after handwriting animation
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'essay-font-toggle';
+        toggle.setAttribute('aria-label', 'Promeni font');
+        toggle.innerHTML = '<span class="toggle-icon">Aa</span>';
+
+        let isCursive = true;
+        toggle.addEventListener('click', () => {
+            isCursive = !isCursive;
+            if (isCursive) {
+                this.container.classList.add('cursive-text');
+                this.container.classList.remove('normal-text');
+            } else {
+                this.container.classList.remove('cursive-text');
+                this.container.classList.add('normal-text');
+            }
+        });
+
+        // Insert toggle at bottom of paper
+        this.paper.appendChild(toggle);
+    }
+
     skip() {
         this.stopPenTracking();
 
@@ -355,9 +379,17 @@ class WriterSimulator {
         this.hasAnimated = true;
 
         this.container.classList.remove('is-animating');
-        this.container.classList.remove('handwriting-mode');
         this.container.classList.remove('waiting-to-animate');
         this.container.classList.add('has-animated');
+
+        // Remove handwriting-mode class (animation is done)
+        this.container.classList.remove('handwriting-mode');
+
+        // Keep cursive font if handwriting mode was used, show font toggle
+        if (this.mode === 'handwriting') {
+            this.container.classList.add('cursive-text');
+            this.showFontToggle();
+        }
 
         if (this.observer) {
             this.observer.disconnect();
