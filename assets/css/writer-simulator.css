@@ -3,8 +3,22 @@
  * Includes parchment effect, typewriter cursor, and pen positioning
  */
 
-/* Google Font for handwriting mode */
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500&display=swap');
+/* Dancing Script font - loaded locally */
+@font-face {
+    font-family: 'Dancing Script';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/dancing-script/DancingScript-Regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Dancing Script';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/dancing-script/DancingScript-Medium.woff2') format('woff2');
+}
 
 /* ==========================================================================
    Essays Page Layout

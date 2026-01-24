@@ -339,6 +339,44 @@ $db->query("INSERT INTO comments (text) VALUES ('$userInput')");
 
 ---
 
+### Rule #12: No External CDN/API - Download Everything Locally
+
+**NIKADA ne koristi eksterne CDN linkove ili API-je za biblioteke, fontove, ili bilo koje resurse.**
+
+**OBAVEZNO:**
+1. Preuzmi fajl lokalno u odgovarajući folder:
+   - JavaScript biblioteke → `assets/libraries/`
+   - Fontovi → `assets/fonts/[font-name]/`
+   - CSS biblioteke → `assets/css/lib/`
+2. Referenciraj lokalni fajl umesto CDN URL-a
+
+**Ako preuzimanje NIJE moguće** (npr. API koji zahteva ključ, ili real-time servis):
+- **PITAJ KORISNIKA** pre implementacije
+- Objasni zašto mora biti eksterni poziv
+
+```css
+/* ❌ ZABRANJENO */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script');
+
+/* ✅ OBAVEZNO */
+@font-face {
+    font-family: 'Dancing Script';
+    src: url('../fonts/dancing-script/DancingScript-Regular.woff2') format('woff2');
+}
+```
+
+```html
+<!-- ❌ ZABRANJENO -->
+<script src="https://cdn.jsdelivr.net/npm/library@1.0.0/lib.min.js"></script>
+
+<!-- ✅ OBAVEZNO -->
+<script src="assets/libraries/library.min.js"></script>
+```
+
+**Razlog:** Eksterni CDN-ovi mogu pasti, usporiti stranicu, ili prestati da rade. Lokalni fajlovi garantuju pouzdanost.
+
+---
+
 ## ADMIN SYSTEM
 
 **Access Control Flow:**
