@@ -66,6 +66,13 @@
 <!-- Base scripts -->
 <script src="<?php echo $basePath; ?>assets/js/main.js"></script>
 
+<!-- Library scripts (third-party) - must load before page scripts -->
+<?php if (isset($libraries) && is_array($libraries)): ?>
+    <?php foreach ($libraries as $lib): ?>
+<script src="<?php echo $basePath; ?>assets/libraries/<?php echo $lib; ?>.js"></script>
+    <?php endforeach; ?>
+<?php endif; ?>
+
 <!-- Page-specific scripts -->
 <?php if (isset($scripts) && is_array($scripts)): ?>
     <?php foreach ($scripts as $script): ?>

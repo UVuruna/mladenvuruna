@@ -36,7 +36,7 @@
 
     <!-- StPageFlip library (for book reader) -->
     <?php if (in_array('book-reader', $styles ?? [])): ?>
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+    <script src="<?php echo $basePath; ?>assets/libraries/page-flip.min.js"></script>
     <?php endif; ?>
 
     <!-- Open Graph -->
