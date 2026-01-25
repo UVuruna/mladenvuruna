@@ -265,8 +265,12 @@ html {
     visibility: hidden;
     transform: rotate(30deg);
     transform-origin: bottom center;
-    will-change: left, top;
+    will-change: left;  /* Only X changes now, Y is fixed */
     filter: drop-shadow(2px 4px 3px rgba(0, 0, 0, 0.3));
+
+    /* Fixed at bottom of paper, above skip button */
+    bottom: calc(var(--spacing-md) + 45px);
+    /* left is set by JS */
 }
 
 @keyframes pen-writing {
