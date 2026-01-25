@@ -63,7 +63,6 @@
 
 /* Book stage grows to fill available space */
 .book-entry .book-stage {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
