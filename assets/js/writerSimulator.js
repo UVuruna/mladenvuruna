@@ -492,11 +492,19 @@ const WriterSimulatorQueue = {
         for (let i = 0; i < this.instances.length; i++) {
             const instance = this.instances[i];
             if (!instance.hasAnimated && !instance.isAnimating) {
-                // Check if visible
-                const rect = instance.container.getBoundingClientRect();
-                const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+                const rect = instance.paper.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
 
-                if (isVisible) {
+                // Check if paper is 100% visible in viewport
+                const isFullyVisible = rect.top >= 0 && rect.bottom <= viewportHeight;
+
+                // For tall papers that can't be 100% visible, use 80% threshold
+                const paperHeight = rect.height;
+                const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
+                const visibleRatio = visibleHeight / paperHeight;
+                const isMostlyVisible = visibleRatio >= 0.8 && rect.top >= 0;
+
+                if (isFullyVisible || (paperHeight > viewportHeight && isMostlyVisible)) {
                     this.currentIndex = i;
                     this.isAnimating = true;
                     instance.start();
