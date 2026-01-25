@@ -529,7 +529,6 @@ const WriterSimulatorQueue = {
     currentIndex: -1,
     isAnimating: false,
     observer: null,
-    tallPaperObserver: null,
 
     add(instance) {
         this.instances.push(instance);
@@ -537,14 +536,14 @@ const WriterSimulatorQueue = {
 
     /**
      * Setup IntersectionObserver for 100% visibility detection
+     * Before animation, paper only shows title (content hidden) - always small
      */
     setupObserver() {
-        // Observer for papers that fit in viewport (100% visible)
         this.observer = new IntersectionObserver((entries) => {
             if (this.isAnimating) return;
 
             for (const entry of entries) {
-                // Only trigger when fully visible (intersectionRatio ~1.0)
+                // Only trigger when 100% visible
                 if (entry.isIntersecting && entry.intersectionRatio >= 0.99) {
                     const instance = this.instances.find(inst => inst.paper === entry.target);
                     if (instance && !instance.hasAnimated && !instance.isAnimating) {
@@ -560,34 +559,9 @@ const WriterSimulatorQueue = {
             rootMargin: '0px'
         });
 
-        // Observer for tall papers (80% visible threshold)
-        this.tallPaperObserver = new IntersectionObserver((entries) => {
-            if (this.isAnimating) return;
-
-            for (const entry of entries) {
-                if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
-                    const instance = this.instances.find(inst => inst.paper === entry.target);
-                    if (instance && !instance.hasAnimated && !instance.isAnimating) {
-                        // Only use this for papers taller than viewport
-                        const rect = entry.target.getBoundingClientRect();
-                        if (rect.height > window.innerHeight) {
-                            this.currentIndex = this.instances.indexOf(instance);
-                            this.isAnimating = true;
-                            instance.start();
-                            return;
-                        }
-                    }
-                }
-            }
-        }, {
-            threshold: [0.8],
-            rootMargin: '0px'
-        });
-
         // Observe all essay papers
         this.instances.forEach(instance => {
             this.observer.observe(instance.paper);
-            this.tallPaperObserver.observe(instance.paper);
         });
     },
 
