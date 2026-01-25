@@ -175,6 +175,7 @@ class WriterSimulator {
         if (this.isAnimating || this.hasAnimated) return;
 
         this.isAnimating = true;
+        this.disableScroll();  // Lock scroll during animation
         this.container.classList.remove('waiting-to-animate');
         this.container.classList.add('is-animating');
 
@@ -346,6 +347,42 @@ class WriterSimulator {
         }
     }
 
+    /**
+     * Disable manual scroll (wheel + touch) during animation
+     */
+    disableScroll() {
+        this.scrollHandler = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+
+        this.preventScrollKeys = (e) => {
+            // space, pgup, pgdn, end, home, arrows
+            const scrollKeys = [32, 33, 34, 35, 36, 37, 38, 39, 40];
+            if (scrollKeys.includes(e.keyCode)) {
+                e.preventDefault();
+            }
+        };
+
+        window.addEventListener('wheel', this.scrollHandler, { passive: false });
+        window.addEventListener('touchmove', this.scrollHandler, { passive: false });
+        document.addEventListener('keydown', this.preventScrollKeys);
+    }
+
+    /**
+     * Re-enable manual scroll
+     */
+    enableScroll() {
+        if (this.scrollHandler) {
+            window.removeEventListener('wheel', this.scrollHandler);
+            window.removeEventListener('touchmove', this.scrollHandler);
+        }
+        if (this.preventScrollKeys) {
+            document.removeEventListener('keydown', this.preventScrollKeys);
+        }
+    }
+
     removePen() {
         if (this.pen) {
             this.pen.remove();
@@ -379,6 +416,7 @@ class WriterSimulator {
 
     skip() {
         this.stopPenTracking();
+        this.enableScroll();  // Restore scroll
 
         if (this.typed) {
             this.typed.destroy();
@@ -400,6 +438,7 @@ class WriterSimulator {
 
     onComplete() {
         this.stopPenTracking();
+        this.enableScroll();  // Restore scroll
         this.removePen();  // Remove pen from DOM - it's never used again
         this.isAnimating = false;
         this.hasAnimated = true;
