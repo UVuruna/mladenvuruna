@@ -615,5 +615,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     window.addEventListener('scroll', checkScroll, { passive: true });
-    checkScroll(); // Check immediately
+
+    // Delay initial check to let browser restore scroll position after refresh
+    // This prevents animations from starting when user is at bottom of page
+    setTimeout(() => {
+        requestAnimationFrame(checkScroll);
+    }, 150);
 });

@@ -28,7 +28,8 @@
    Prevent X-axis overflow from pen
    ========================================================================== */
 
-html {
+html,
+body {
     overflow-x: hidden;
 }
 
