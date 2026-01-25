@@ -16,8 +16,8 @@
     "pen": {
         "width": 100,
         "mobileWidth": 70,
-        "offsetX": -20,
-        "offsetY": 35,
+        "offsetX": -10,
+        "offsetY": 25,
         "animationDuration": 0.3,
         "rotationMin": 27,
         "rotationMax": 35

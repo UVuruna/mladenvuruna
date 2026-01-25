@@ -324,9 +324,8 @@ body {
 /* Cursive font variables for consistency */
 .essay-entry {
     --cursive-font: 'Dancing Script', cursive;
-    --cursive-content-size: var(--font-size-xl);
-    --cursive-title-size: calc(var(--font-size-2xl) * 1.1);
-    --cursive-line-height: 1.8;
+    --cursive-content-size: var(--font-size-2xl);
+    --cursive-title-size: var(--font-size-3xl);
 }
 
 /* Apply cursive font - SAME styles for both modes */
