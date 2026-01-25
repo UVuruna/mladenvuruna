@@ -21,7 +21,7 @@ const ThemeSwitch = (function() {
     const WIPE_DURATION = 600;
 
     // SVG path for reading dimensions
-    const SVG_BG_PATH = 'assets/img/svg/night_bg.svg';
+    const SVG_BG_PATH = 'assets/img/svg/night.svg';
 
     /**
      * Fetch SVG and extract viewBox dimensions to set CSS variables
@@ -51,12 +51,7 @@ const ThemeSwitch = (function() {
                 }
             }
         } catch (error) {
-            // Fallback: use default aspect ratio (280/130)
-            document.documentElement.style.setProperty('--switch-aspect-ratio', '2.1538');
-
-            if (window.MV_IS_ADMIN) {
-                console.warn('📐 Theme Switch: Could not load SVG, using fallback aspect ratio');
-            }
+            console.error('📐 Theme Switch: Failed to load SVG for dimensions', error);
         }
     }
 

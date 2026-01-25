@@ -8,8 +8,8 @@
     /* Base height - only value to change for sizing */
     --switch-height: 35px;
 
-    /* Calculated from SVG viewBox via JS (fallback: 280/130) */
-    --switch-aspect-ratio: 2.1538;
+    /* Dynamically set from SVG viewBox by JS */
+    --switch-aspect-ratio: 2.1538; /* Initial value, overwritten by themeSwitch.js */
 
     /* Derived values */
     --switch-width: calc(var(--switch-height) * var(--switch-aspect-ratio));
