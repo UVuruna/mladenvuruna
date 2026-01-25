@@ -56,6 +56,8 @@
 .theme-switch__night-bg {
     background-image: url('../img/svg/night_bg.svg');
     z-index: 1;
+    opacity: 1;
+    transition: opacity var(--wipe-duration) ease-in-out;
 }
 
 .theme-switch__day-bg {
@@ -68,6 +70,11 @@
 /* Day mode: day bg visible (wipes in from left) */
 .theme-switch__input:checked ~ .theme-switch__track .theme-switch__day-bg {
     clip-path: inset(0 0 0 0);
+}
+
+/* Hide night bg when day is active */
+.theme-switch__input:checked ~ .theme-switch__track .theme-switch__night-bg {
+    opacity: 0;
 }
 
 /* ========================
