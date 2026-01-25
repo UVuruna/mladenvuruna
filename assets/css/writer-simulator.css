@@ -104,7 +104,7 @@ html {
         0 4px 6px rgba(0, 0, 0, 0.1),
         0 12px 20px rgba(0, 0, 0, 0.1),
         inset 0 0 80px rgba(138, 77, 15, 0.08);
-    overflow: hidden;  /* Clip pen when it goes outside bounds */
+    /* Pen must be visible outside bounds - do NOT use overflow: hidden */
 }
 
 /* Paper texture overlay using CSS noise */
@@ -184,7 +184,7 @@ html {
 
 .essay-paper {
     position: relative;
-    padding: var(--spacing-xl) var(--spacing-2xl);
+    padding: var(--spacing-xl) var(--spacing-2xl) calc(var(--spacing-2xl) + 40px);
     min-height: 300px;
     overflow: visible;
 }
@@ -444,7 +444,7 @@ html {
 
 @media (max-width: 767px) {
     .essay-paper {
-        padding: var(--spacing-lg) var(--spacing-md);
+        padding: var(--spacing-lg) var(--spacing-md) calc(var(--spacing-xl) + 40px);
     }
 
     .essay-title {
