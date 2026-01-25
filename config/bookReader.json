@@ -1,0 +1,25 @@
+{
+    "timing": {
+        "transitionDuration": 400,
+        "flipDuration": 800
+    },
+
+    "page": {
+        "aspectRatio": 0.65,
+        "minWidth": 200,
+        "maxWidth": 1000,
+        "minHeight": 300,
+        "maxHeight": 1400
+    },
+
+    "pageFlip": {
+        "showCover": true,
+        "mobileScrollSupport": false,
+        "useMouseEvents": true,
+        "swipeDistance": 30,
+        "clickEventForward": true,
+        "drawShadow": true,
+        "maxShadowOpacity": 0.5,
+        "showPageCorners": true
+    }
+}

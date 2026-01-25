@@ -1,0 +1,18 @@
+{
+    "location": {
+        "latitude": 44.82,
+        "longitude": 20.46,
+        "city": "Belgrade",
+        "timezone": "Europe/Belgrade"
+    },
+
+    "breakpoints": {
+        "mobile": 768,
+        "tablet": 1024,
+        "desktop": 1200
+    },
+
+    "loader": {
+        "fadeDelay": 500
+    }
+}

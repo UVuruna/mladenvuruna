@@ -4,11 +4,57 @@
  * https://github.com/Nodlik/StPageFlip
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+// Global config loaded from JSON
+let BookReaderConfig = {
+    timing: { transitionDuration: 400, flipDuration: 800 },
+    page: { aspectRatio: 0.65, minWidth: 200, maxWidth: 1000, minHeight: 300, maxHeight: 1400 },
+    pageFlip: {},
+    breakpoints: { mobile: 768 }
+};
+
+// Load config and initialize
+(async function() {
+    try {
+        // Load site config for breakpoints
+        const siteResponse = await fetch('config/site.json');
+        if (siteResponse.ok) {
+            const siteConfig = await siteResponse.json();
+            if (siteConfig.breakpoints) {
+                BookReaderConfig.breakpoints = siteConfig.breakpoints;
+            }
+        }
+
+        // Load book reader specific config
+        const bookResponse = await fetch('config/bookReader.json');
+        if (bookResponse.ok) {
+            const bookConfig = await bookResponse.json();
+            Object.assign(BookReaderConfig.timing, bookConfig.timing || {});
+            Object.assign(BookReaderConfig.page, bookConfig.page || {});
+            Object.assign(BookReaderConfig.pageFlip, bookConfig.pageFlip || {});
+        }
+
+        if (window.MV_IS_ADMIN) {
+            console.log('BookReader config loaded:', BookReaderConfig);
+        }
+    } catch (error) {
+        if (window.MV_IS_ADMIN) {
+            console.warn('BookReader: Using default config', error);
+        }
+    }
+
+    // Initialize after config loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBookReaders);
+    } else {
+        initBookReaders();
+    }
+})();
+
+function initBookReaders() {
     document.querySelectorAll('.book-container').forEach(container => {
         new BookReader(container);
     });
-});
+}
 
 class BookReader {
     constructor(container) {
@@ -29,9 +75,9 @@ class BookReader {
         this.isAnimating = false;
         this.currentState = 'closed'; // 'closed', 'front-cover', 'spread', 'back-cover'
 
-        // Timing constants (ms)
-        this.TRANSITION_DURATION = 400;
-        this.FLIP_DURATION = 800;
+        // Timing from config
+        this.TRANSITION_DURATION = BookReaderConfig.timing.transitionDuration;
+        this.FLIP_DURATION = BookReaderConfig.timing.flipDuration;
 
         this.init();
     }
@@ -75,8 +121,9 @@ class BookReader {
         const availableHeight = this.stage.clientHeight;
         const maxHeight = availableHeight;
 
-        const aspectRatio = 0.65;
-        const isLandscape = window.innerWidth > window.innerHeight && window.innerWidth >= 768;
+        const aspectRatio = BookReaderConfig.page.aspectRatio;
+        const mobileBreakpoint = BookReaderConfig.breakpoints.mobile;
+        const isLandscape = window.innerWidth > window.innerHeight && window.innerWidth >= mobileBreakpoint;
 
         let pageWidth, pageHeight;
 
@@ -107,7 +154,8 @@ class BookReader {
     }
 
     isLandscape() {
-        return window.innerWidth > window.innerHeight && window.innerWidth >= 768;
+        const mobileBreakpoint = BookReaderConfig.breakpoints.mobile;
+        return window.innerWidth > window.innerHeight && window.innerWidth >= mobileBreakpoint;
     }
 
     buildPages() {
@@ -259,29 +307,32 @@ class BookReader {
         this.flipbookEl.style.display = 'block';
         console.log('flipbookEl display set to block');
 
-        // Initialize PageFlip
+        // Initialize PageFlip with config values
         console.log('Creating new St.PageFlip...');
+        const pageConfig = BookReaderConfig.page;
+        const flipConfig = BookReaderConfig.pageFlip;
+
         this.pageFlip = new St.PageFlip(this.flipbookEl, {
             width: size.width,
             height: size.height,
             size: 'fixed',
-            minWidth: 200,
-            maxWidth: 1000,
-            minHeight: 300,
-            maxHeight: 1400,
-            showCover: true,
-            mobileScrollSupport: false,
-            useMouseEvents: true,
-            swipeDistance: 30,
-            clickEventForward: true,
+            minWidth: pageConfig.minWidth,
+            maxWidth: pageConfig.maxWidth,
+            minHeight: pageConfig.minHeight,
+            maxHeight: pageConfig.maxHeight,
+            showCover: flipConfig.showCover ?? true,
+            mobileScrollSupport: flipConfig.mobileScrollSupport ?? false,
+            useMouseEvents: flipConfig.useMouseEvents ?? true,
+            swipeDistance: flipConfig.swipeDistance ?? 30,
+            clickEventForward: flipConfig.clickEventForward ?? true,
             usePortrait: !landscape,
             startPage: 0,
-            drawShadow: true,
+            drawShadow: flipConfig.drawShadow ?? true,
             flippingTime: this.FLIP_DURATION,
             startZIndex: 0,
             autoSize: false,
-            maxShadowOpacity: 0.5,
-            showPageCorners: true,
+            maxShadowOpacity: flipConfig.maxShadowOpacity ?? 0.5,
+            showPageCorners: flipConfig.showPageCorners ?? true,
         });
         console.log('PageFlip created:', this.pageFlip);
 

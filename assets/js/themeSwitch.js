@@ -6,22 +6,48 @@
 const ThemeSwitch = (function() {
     'use strict';
 
-    // Belgrade coordinates (hardcoded)
-    const BELGRADE_LAT = 44.82;
-    const BELGRADE_LNG = 20.46;
-
-    // Storage key
-    const STORAGE_KEY = 'mv_theme_preference';
+    // Config loaded from JSON files
+    let config = {
+        location: { latitude: 44.82, longitude: 20.46 },
+        svgPath: 'assets/img/svg/night.svg',
+        wipeDuration: 600,
+        storageKey: 'mv_theme_preference'
+    };
 
     // DOM elements
     let switchInput = null;
     let switchContainer = null;
 
-    // Transition duration (must match CSS --wipe-duration)
-    const WIPE_DURATION = 600;
+    /**
+     * Load configuration from JSON files
+     */
+    async function loadConfig() {
+        try {
+            // Load site config (location, breakpoints)
+            const siteResponse = await fetch('config/site.json');
+            if (siteResponse.ok) {
+                const siteConfig = await siteResponse.json();
+                if (siteConfig.location) {
+                    config.location = siteConfig.location;
+                }
+            }
 
-    // SVG path for reading dimensions
-    const SVG_BG_PATH = 'assets/img/svg/night.svg';
+            // Load theme switch specific config
+            const themeResponse = await fetch('config/themeSwitch.json');
+            if (themeResponse.ok) {
+                const themeConfig = await themeResponse.json();
+                Object.assign(config, themeConfig);
+            }
+
+            if (window.MV_IS_ADMIN) {
+                console.log('ThemeSwitch config loaded:', config);
+            }
+        } catch (error) {
+            if (window.MV_IS_ADMIN) {
+                console.warn('ThemeSwitch: Using default config', error);
+            }
+        }
+    }
 
     /**
      * Fetch SVG and extract viewBox dimensions to set CSS variables
@@ -29,7 +55,7 @@ const ThemeSwitch = (function() {
      */
     async function initSwitchDimensions() {
         try {
-            const response = await fetch(SVG_BG_PATH);
+            const response = await fetch(config.svgPath);
             const svgText = await response.text();
 
             // Extract viewBox: "0 0 WIDTH HEIGHT"
@@ -165,14 +191,16 @@ const ThemeSwitch = (function() {
      */
     function isDaytime() {
         const now = new Date();
-        const { sunrise, sunset } = calculateSunTimes(now, BELGRADE_LAT, BELGRADE_LNG);
+        const { latitude, longitude } = config.location;
+        const { sunrise, sunset } = calculateSunTimes(now, latitude, longitude);
 
         const isDay = now >= sunrise && now < sunset;
 
         // Debug logging (only for admin)
         if (window.MV_IS_ADMIN) {
+            const city = config.location.city || 'Unknown';
             console.group('🌅 Theme Switch - Sunrise/Sunset Calculation');
-            console.log('Location: Belgrade (44.82°N, 20.46°E)');
+            console.log(`Location: ${city} (${latitude}°N, ${longitude}°E)`);
             console.log('Current time:', formatTime(now));
             console.log('Sunrise:', formatTime(sunrise));
             console.log('Sunset:', formatTime(sunset));
@@ -189,7 +217,7 @@ const ThemeSwitch = (function() {
      */
     function getInitialTheme() {
         // Check sessionStorage for user preference
-        const stored = sessionStorage.getItem(STORAGE_KEY);
+        const stored = sessionStorage.getItem(config.storageKey);
 
         if (stored) {
             if (window.MV_IS_ADMIN) {
@@ -249,7 +277,7 @@ const ThemeSwitch = (function() {
         }
 
         applyTheme(newTheme);
-        sessionStorage.setItem(STORAGE_KEY, newTheme);
+        sessionStorage.setItem(config.storageKey, newTheme);
 
         if (window.MV_IS_ADMIN) {
             console.log('🎨 Theme: User toggled to:', newTheme);
@@ -260,18 +288,22 @@ const ThemeSwitch = (function() {
             if (switchContainer) {
                 switchContainer.classList.remove('theme-switch--to-day', 'theme-switch--to-night');
             }
-        }, WIPE_DURATION + 50);
+        }, config.wipeDuration + 50);
     }
 
     /**
      * Initialize theme switch
      */
-    function init() {
+    async function init() {
         // Apply initial theme immediately (before DOM ready to prevent flash)
+        // Uses default config values first
         const initialTheme = getInitialTheme();
         applyTheme(initialTheme);
 
-        // Initialize switch dimensions from SVG
+        // Load config from JSON files (async)
+        await loadConfig();
+
+        // Initialize switch dimensions from SVG (now uses loaded config)
         initSwitchDimensions();
 
         // Wait for DOM to set up event listener

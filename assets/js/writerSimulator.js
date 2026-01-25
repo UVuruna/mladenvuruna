@@ -23,6 +23,11 @@ const WriterSimulatorBasePath = (() => {
     return '/';
 })();
 
+// Global site config for shared values like breakpoints
+let WriterSimulatorSiteConfig = {
+    breakpoints: { mobile: 768 }
+};
+
 class WriterSimulator {
     constructor(container, options = {}) {
         this.container = container;
@@ -232,7 +237,8 @@ class WriterSimulator {
             this.pen.style.visibility = 'hidden';
 
             // Apply pen settings from config
-            const isMobile = window.innerWidth < 768;
+            const mobileBreakpoint = WriterSimulatorSiteConfig.breakpoints.mobile;
+            const isMobile = window.innerWidth < mobileBreakpoint;
             const penWidth = isMobile ? this.options.pen.mobileWidth : this.options.pen.width;
             this.pen.style.width = `${penWidth}px`;
 
@@ -455,12 +461,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     let settings = {};
 
     try {
+        // Load site config for shared values (breakpoints)
+        const siteResponse = await fetch(WriterSimulatorBasePath + 'config/site.json');
+        if (siteResponse.ok) {
+            const siteConfig = await siteResponse.json();
+            if (siteConfig.breakpoints) {
+                WriterSimulatorSiteConfig.breakpoints = siteConfig.breakpoints;
+            }
+        }
+
+        // Load writer simulator specific config
         const response = await fetch(WriterSimulatorBasePath + 'config/writerSimulator.json');
         if (response.ok) {
             settings = await response.json();
         }
+
+        if (window.MV_IS_ADMIN) {
+            console.log('WriterSimulator config loaded:', settings);
+            console.log('WriterSimulator site config:', WriterSimulatorSiteConfig);
+        }
     } catch (error) {
         // Use defaults
+        if (window.MV_IS_ADMIN) {
+            console.warn('WriterSimulator: Using default config', error);
+        }
     }
 
     if (settings.enabled === false) return;
