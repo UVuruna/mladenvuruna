@@ -522,49 +522,78 @@ class WriterSimulator {
 
 /**
  * Queue manager - only one animation at a time
+ * Uses IntersectionObserver for reliable visibility detection
  */
 const WriterSimulatorQueue = {
     instances: [],
     currentIndex: -1,
     isAnimating: false,
+    observer: null,
+    tallPaperObserver: null,
 
     add(instance) {
         this.instances.push(instance);
     },
 
-    startNext() {
-        if (this.isAnimating) return;
+    /**
+     * Setup IntersectionObserver for 100% visibility detection
+     */
+    setupObserver() {
+        // Observer for papers that fit in viewport (100% visible)
+        this.observer = new IntersectionObserver((entries) => {
+            if (this.isAnimating) return;
 
-        // Find next instance that hasn't animated yet
-        for (let i = 0; i < this.instances.length; i++) {
-            const instance = this.instances[i];
-            if (!instance.hasAnimated && !instance.isAnimating) {
-                const rect = instance.paper.getBoundingClientRect();
-                const viewportHeight = window.innerHeight;
-
-                // Check if paper is 100% visible in viewport
-                const isFullyVisible = rect.top >= 0 && rect.bottom <= viewportHeight;
-
-                // For tall papers that can't be 100% visible, use 80% threshold
-                const paperHeight = rect.height;
-                const visibleHeight = Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0);
-                const visibleRatio = visibleHeight / paperHeight;
-                const isMostlyVisible = visibleRatio >= 0.8 && rect.top >= 0;
-
-                if (isFullyVisible || (paperHeight > viewportHeight && isMostlyVisible)) {
-                    this.currentIndex = i;
-                    this.isAnimating = true;
-                    instance.start();
-                    return;
+            for (const entry of entries) {
+                // Only trigger when fully visible (intersectionRatio ~1.0)
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.99) {
+                    const instance = this.instances.find(inst => inst.paper === entry.target);
+                    if (instance && !instance.hasAnimated && !instance.isAnimating) {
+                        this.currentIndex = this.instances.indexOf(instance);
+                        this.isAnimating = true;
+                        instance.start();
+                        return;
+                    }
                 }
             }
-        }
+        }, {
+            threshold: [0.99, 1.0],
+            rootMargin: '0px'
+        });
+
+        // Observer for tall papers (80% visible threshold)
+        this.tallPaperObserver = new IntersectionObserver((entries) => {
+            if (this.isAnimating) return;
+
+            for (const entry of entries) {
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
+                    const instance = this.instances.find(inst => inst.paper === entry.target);
+                    if (instance && !instance.hasAnimated && !instance.isAnimating) {
+                        // Only use this for papers taller than viewport
+                        const rect = entry.target.getBoundingClientRect();
+                        if (rect.height > window.innerHeight) {
+                            this.currentIndex = this.instances.indexOf(instance);
+                            this.isAnimating = true;
+                            instance.start();
+                            return;
+                        }
+                    }
+                }
+            }
+        }, {
+            threshold: [0.8],
+            rootMargin: '0px'
+        });
+
+        // Observe all essay papers
+        this.instances.forEach(instance => {
+            this.observer.observe(instance.paper);
+            this.tallPaperObserver.observe(instance.paper);
+        });
     },
 
     onComplete() {
         this.isAnimating = false;
-        // Small delay before starting next
-        setTimeout(() => this.startNext(), 500);
+        // IntersectionObserver will automatically trigger when next paper becomes visible
     }
 };
 
@@ -609,16 +638,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         WriterSimulatorQueue.add(instance);
     });
 
-    // Start first visible on scroll
-    const checkScroll = () => {
-        WriterSimulatorQueue.startNext();
-    };
-
-    window.addEventListener('scroll', checkScroll, { passive: true });
-
-    // Delay initial check to let browser restore scroll position after refresh
-    // This prevents animations from starting when user is at bottom of page
-    setTimeout(() => {
-        requestAnimationFrame(checkScroll);
-    }, 150);
+    // Setup IntersectionObserver for visibility detection
+    // This is more reliable than scroll events - handles scroll restoration correctly
+    WriterSimulatorQueue.setupObserver();
 });
