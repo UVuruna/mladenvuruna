@@ -202,6 +202,9 @@ class WriterSimulator {
         this.typedWrapper.className = 'typed-wrapper';
         this.contentEl.appendChild(this.typedWrapper);
 
+        // Start cursor tracking for auto-scroll
+        this.startCursorTracking();
+
         this.typed = new Typed(this.typedWrapper, {
             strings: [htmlContent],
             typeSpeed: typeSpeed,
@@ -210,10 +213,48 @@ class WriterSimulator {
             showCursor: true,
             contentType: 'html',
             onComplete: () => {
+                this.stopCursorTracking();
                 this.contentEl.innerHTML = this.parseMarkdown(this.rawText);
                 this.onComplete();
             }
         });
+    }
+
+    /**
+     * Track cursor position for typewriter auto-scroll
+     */
+    startCursorTracking() {
+        const updateScroll = () => {
+            if (!this.isAnimating) {
+                this.stopCursorTracking();
+                return;
+            }
+
+            const cursor = this.container.querySelector('.typed-cursor');
+            if (cursor) {
+                const cursorRect = cursor.getBoundingClientRect();
+                const viewportBottom = window.innerHeight;
+                const threshold = 80;
+
+                if (cursorRect.bottom > viewportBottom - threshold) {
+                    window.scrollBy({
+                        top: cursorRect.bottom - viewportBottom + threshold + 20,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            this.cursorTrackingInterval = requestAnimationFrame(updateScroll);
+        };
+
+        this.cursorTrackingInterval = requestAnimationFrame(updateScroll);
+    }
+
+    stopCursorTracking() {
+        if (this.cursorTrackingInterval) {
+            cancelAnimationFrame(this.cursorTrackingInterval);
+            this.cursorTrackingInterval = null;
+        }
     }
 
     startHandwriting() {
@@ -270,7 +311,7 @@ class WriterSimulator {
     }
 
     /**
-     * Track pen X position (Y is fixed at bottom via CSS)
+     * Track pen position - follows last character
      */
     startPenTracking() {
         if (!this.pen || !this.typedWrapper || !this.paper) return;
@@ -296,14 +337,18 @@ class WriterSimulator {
                 if (rects.length > 0) {
                     const lastRect = rects[rects.length - 1];
                     const paperRect = this.paper.getBoundingClientRect();
+                    const penHeight = this.pen.offsetHeight || 0;
 
                     // X position follows cursor (clamped to paper bounds)
                     let penX = lastRect.right - paperRect.left + this.options.pen.offsetX;
                     const maxX = paperRect.width - (this.pen.offsetWidth || 100) - 10;
                     penX = Math.max(0, Math.min(maxX, penX));
 
+                    // Y position follows cursor (pen tip at text baseline)
+                    const penY = lastRect.top - paperRect.top - penHeight + this.options.pen.offsetY;
+
                     this.pen.style.left = `${penX}px`;
-                    // Y position is fixed by CSS (bottom of paper) - don't set top
+                    this.pen.style.top = `${penY}px`;
 
                     // Show pen only after we have position
                     if (this.pen.style.opacity !== '1') {
@@ -416,6 +461,7 @@ class WriterSimulator {
 
     skip() {
         this.stopPenTracking();
+        this.stopCursorTracking();
         this.enableScroll();  // Restore scroll
 
         if (this.typed) {
@@ -438,6 +484,7 @@ class WriterSimulator {
 
     onComplete() {
         this.stopPenTracking();
+        this.stopCursorTracking();
         this.enableScroll();  // Restore scroll
         this.removePen();  // Remove pen from DOM - it's never used again
         this.isAnimating = false;
