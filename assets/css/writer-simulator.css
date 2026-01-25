@@ -25,6 +25,14 @@
 }
 
 /* ==========================================================================
+   Prevent X-axis overflow from pen
+   ========================================================================== */
+
+html {
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
    Essays Page Layout
    ========================================================================== */
 
@@ -96,7 +104,7 @@
         0 4px 6px rgba(0, 0, 0, 0.1),
         0 12px 20px rgba(0, 0, 0, 0.1),
         inset 0 0 80px rgba(138, 77, 15, 0.08);
-    overflow: visible;
+    overflow: hidden;  /* Clip pen when it goes outside bounds */
 }
 
 /* Paper texture overlay using CSS noise */
