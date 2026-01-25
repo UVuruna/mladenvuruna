@@ -269,7 +269,7 @@ class WriterSimulator {
     }
 
     /**
-     * Track pen position by finding the last character position
+     * Track pen X position (Y is fixed at bottom via CSS)
      */
     startPenTracking() {
         if (!this.pen || !this.typedWrapper || !this.paper) return;
@@ -295,21 +295,23 @@ class WriterSimulator {
                 if (rects.length > 0) {
                     const lastRect = rects[rects.length - 1];
                     const paperRect = this.paper.getBoundingClientRect();
-                    const penHeight = this.pen.offsetHeight || 0;
 
-                    // Calculate position relative to paper element
-                    // Pen tip (bottom) should be at cursor, so subtract pen height
-                    const penX = lastRect.right - paperRect.left + this.options.pen.offsetX;
-                    const penY = lastRect.top - paperRect.top - penHeight + this.options.pen.offsetY;
+                    // X position follows cursor (clamped to paper bounds)
+                    let penX = lastRect.right - paperRect.left + this.options.pen.offsetX;
+                    const maxX = paperRect.width - (this.pen.offsetWidth || 100) - 10;
+                    penX = Math.max(0, Math.min(maxX, penX));
 
                     this.pen.style.left = `${penX}px`;
-                    this.pen.style.top = `${penY}px`;
+                    // Y position is fixed by CSS (bottom of paper) - don't set top
 
                     // Show pen only after we have position
                     if (this.pen.style.opacity !== '1') {
                         this.pen.style.opacity = '1';
                         this.pen.style.visibility = 'visible';
                     }
+
+                    // Auto-scroll to keep pen in viewport
+                    this.scrollPenIntoView();
                 }
             }
 
@@ -317,6 +319,24 @@ class WriterSimulator {
         };
 
         this.penTrackingInterval = requestAnimationFrame(updatePen);
+    }
+
+    /**
+     * Auto-scroll page to keep pen visible
+     */
+    scrollPenIntoView() {
+        if (!this.pen) return;
+
+        const penRect = this.pen.getBoundingClientRect();
+        const viewportBottom = window.innerHeight;
+        const threshold = 80; // pixels from bottom
+
+        if (penRect.bottom > viewportBottom - threshold) {
+            window.scrollBy({
+                top: penRect.bottom - viewportBottom + threshold + 20,
+                behavior: 'smooth'
+            });
+        }
     }
 
     stopPenTracking() {
