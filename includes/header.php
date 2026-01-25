@@ -67,6 +67,14 @@
         <h2 id="admin-modal-title">Admin Pristup</h2>
         <form id="admin-form" method="post" action="<?php echo $basePath; ?>api/admin.php">
             <input type="hidden" name="action" value="login">
+            <!-- Hidden username field for password managers and accessibility -->
+            <input type="text"
+                   name="username"
+                   value="admin"
+                   autocomplete="username"
+                   class="visually-hidden"
+                   tabindex="-1"
+                   aria-hidden="true">
             <div class="form-group">
                 <label for="admin-password">Lozinka:</label>
                 <input type="password" id="admin-password" name="password" required autocomplete="current-password">
