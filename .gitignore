@@ -1,5 +1,6 @@
-# Claude Code
-.claude/
+# Claude Code (settings.json IS tracked — Claude Code hooks must survive a clone)
+.claude/*
+!.claude/settings.json
 
 # IDE
 .vscode/
@@ -46,3 +47,8 @@ prompt.txt
 
 # Owner inbox - local only (root Rule #18)
 UV/
+
+# Python (guard tests under tests/)
+__pycache__/
+*.pyc
+.pytest_cache/
