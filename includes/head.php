@@ -1,4 +1,5 @@
 <head>
+    <!-- lang-ok-begin: visitor-facing Serbian meta copy / default title-description strings rendered by this template's logic -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<?php echo $pageDescription ?? 'Mladen Vuruna - pisac i umetnik. Knjige, eseji i umetnička dela.'; ?>">
@@ -48,4 +49,5 @@
 
     <!-- Theme color -->
     <meta name="theme-color" content="#1a1a2e">
+    <!-- lang-ok-end -->
 </head>

@@ -26,5 +26,6 @@ what `mode` controls), and assembles the page shell around them.
   before `$scripts = ['writerSimulator']` runs — see
   [Footer](../../../includes/__about/footer.md)'s load-order note.
 - **Placeholder content is real Serbian prose**, not lorem-ipsum — the two
+  <!-- lang-ok: quoting the two essay titles by name, not writing Serbian prose -->
   essays ("O Pisanju", "Sećanja i Vreme") read as finished short pieces, not
   test filler, even though the `// TODO` marks them as pre-database.

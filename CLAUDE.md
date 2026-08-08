@@ -35,8 +35,7 @@ Start here for the code itself: [README](README.md) ->
   vanilla JavaScript (no build step, no bundler, one `<script>` per
   concern), CSS3 (one stylesheet per page/component, mobile-first), SQLite
   (schema defined in [Database](includes/__about/db.md), not yet populated
-  or queried by any live page). See root Rule #21 (Right Language for the
-  Job): a small server-rendered site with no SPA needs has no reason to
+  or queried by any live page). See Technology Selection (rules/START.md): a small server-rendered site with no SPA needs has no reason to
   reach for a framework or a build pipeline.
 - **No build pipeline, no installer, no GitHub Releases.** THE RELEASE LAW
   ([Ship Rules](../../rules/SHIP.md)) governs *installable desktop apps*;

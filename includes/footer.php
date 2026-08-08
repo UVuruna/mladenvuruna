@@ -4,6 +4,7 @@
  */
 ?>
 
+<!-- lang-ok-begin: visitor-facing Serbian form labels / footer copy rendered by this template's logic -->
 <!-- Contact Section -->
 <section id="kontakt" class="contact-section">
     <div class="container">
@@ -58,10 +59,11 @@
         </div>
 
         <div class="footer-bottom">
-            <p>&copy; <?php echo date('Y'); ?> Mladen Vuruna. Sva prava zadržana.</p>
+            <p>&copy; <?php echo date('Y'); ?> Mladen Vuruna. Sva prava zadržana.</p> <!-- lang-ok: inside lang-ok-begin/end block opened earlier in this file -->
         </div>
     </div>
 </footer>
+<!-- lang-ok-end -->
 
 <!-- Base scripts -->
 <script src="<?php echo $basePath; ?>assets/js/main.js"></script>

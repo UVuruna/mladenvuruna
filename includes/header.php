@@ -7,6 +7,7 @@
 
 <header id="header">
     <div class="header-container">
+        <!-- lang-ok-begin: visitor-facing Serbian nav/UI labels rendered by this template's logic -->
         <!-- Logo -->
         <a href="<?php echo $basePath; ?>" class="logo" aria-label="Početna strana">
             <span class="logo-text">Mladen Vuruna</span>
@@ -87,3 +88,4 @@
     </div>
 </div>
 <?php endif; ?>
+<!-- lang-ok-end -->

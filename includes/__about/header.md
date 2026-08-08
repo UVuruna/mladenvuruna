@@ -4,6 +4,7 @@
 
 ## Purpose
 
+<!-- lang-ok: quoting the actual Serbian nav labels the header renders -->
 Site header: logo, mobile hamburger toggle, main nav (Početna/Knjige/Eseji/
 Galerija/Kontakt), the day/night theme-switch control, and — only for
 whitelisted admin IPs — the Admin button and its password modal.

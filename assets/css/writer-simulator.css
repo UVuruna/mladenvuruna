@@ -4,7 +4,7 @@
  */
 
 /* Dancing Script font - loaded locally */
-/* Latin-ext (includes Serbian characters: Č, Ć, Š, Ž, Đ) */
+/* Latin-ext (includes Serbian characters: Č, Ć, Š, Ž, Đ) */ <!-- lang-ok: naming individual Serbian letters the font must cover, not writing Serbian -->
 @font-face {
     font-family: 'Dancing Script';
     font-style: normal;
