@@ -9,7 +9,7 @@ only tighten root rules, never loosen them.
 |------------------------|----------------------|
 | Implement / fix | `rules/CODE.md` + the folder's `___folder.md` |
 | Write documentation | `rules/DOCS.md` |
-| Any GUI/visual work | `DESIGN.md` |
+| Any GUI/visual work | `../../rules/GUI.md` + `../../DESIGN.md` |
 | Plan / brainstorm | `rules/PLAN.md` |
 
 Start here for the code itself: [README](README.md) ->
@@ -38,11 +38,10 @@ Start here for the code itself: [README](README.md) ->
   or queried by any live page). See root Rule #21 (Right Language for the
   Job): a small server-rendered site with no SPA needs has no reason to
   reach for a framework or a build pipeline.
-- **No build pipeline, no installer, no GitHub Releases.** Root
-  `CLAUDE.md`'s Build & Release System (Rules #23/#24) governs *installable
-  desktop apps*; this is a manually/webhook-deployed website (push to
-  GitHub → Hostinger webhook → auto-deploy), so those rules do not apply
-  here.
+- **No build pipeline, no installer, no GitHub Releases.** THE RELEASE LAW
+  ([Ship Rules](../../rules/SHIP.md)) governs *installable desktop apps*;
+  this is a manually/webhook-deployed website (push to GitHub → Hostinger
+  webhook → auto-deploy), so that law does not apply here.
 - **`config.php` is gitignored and never read into any doc.** It holds the
   real admin IP whitelist and a real `password_hash()` output; the tracked
   `config.example.php` carries identical structure with placeholder values
@@ -83,9 +82,9 @@ The four guard tests + `run_guards.py` + Claude Code hooks live in `tests/` /
 - **Commit format:** plain `0.0.000 description` (root convention, unchanged
   — no per-project delta), following the existing history's style
   (`0.0.NNN Component - detail`).
-- **Config home (root Rule #4):** DB path, image-conversion sizes, admin
-  IPs, admin password hash and site metadata live in the single `CONFIG`
-  array (`config.php` in production, `config.example.php` tracked as its
+- **Config home (THE CONFIG SECTION LAW, [Code Rules](../../rules/CODE.md)):**
+  DB path, image-conversion sizes, admin IPs, admin password hash and site
+  metadata live in the single `CONFIG` array (`config.php` in production, `config.example.php` tracked as its
   structural template) — no other file should contain magic numbers for
   these concerns.
 - **No external CDN/API — download everything locally.** JS libraries live
@@ -104,9 +103,9 @@ The four guard tests + `run_guards.py` + Claude Code hooks live in `tests/` /
   image, semantic HTML — in force across [Header](includes/__about/header.md),
   [Footer](includes/__about/footer.md), [Book Reader](assets/js/__about/bookReader.md)'s
   controls.
-- Communicate with the owner in Serbian (Latin script); everything written
-  to files stays English (root Rules #12/#13) — unchanged, restated only
-  because this project's own content (essay/book copy in Serbian) makes the
-  boundary worth naming: **user-facing product copy** is Serbian,
-  **code identifiers, comments and documentation prose** are English even
-  when they describe Serbian-language content.
+- Language: see root `CLAUDE.md` → Universal Conduct. Tightening: this
+  project's own content (essay/book copy) is genuinely Serbian, so the
+  content paths carrying it are declared exempt from the language guard in
+  `.claude/language-frame.json` — **user-facing product copy** stays
+  Serbian, **code identifiers, comments and documentation prose** stay
+  English even when they describe Serbian-language content.
